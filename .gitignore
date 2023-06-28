@@ -1,0 +1,7 @@
+*.dll
+bin/
+obj/
+Debug/
+.idea/
+Migrations/
+.vscode/
