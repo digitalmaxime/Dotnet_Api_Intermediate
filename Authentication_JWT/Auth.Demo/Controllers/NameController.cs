@@ -1,8 +1,11 @@
-﻿using Auth.Demo.Services.AuthManager;
+﻿using Auth.Demo.Entities;
+using Auth.Demo.Services.AuthManager;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Demo.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class NameController: ControllerBase
@@ -13,13 +16,22 @@ public class NameController: ControllerBase
     {
         _jwtAuthenticationManager = jwtAuthenticationManager;
     }
-    
-    [HttpGet("GetListOfString")]
-    public IEnumerable<string> GetListOfString()
-    {
-        return new string[] { "a", "b", "c" };
-    }
 
+    [HttpGet]
+    [Route("GetValueByQueryParam")] 
+    public string GetValueByQueryParam(int id) // api/Name/GetValue?id=4
+    {
+        return "value " + id.ToString();
+    }
+    
+    [HttpGet]
+    [Route("GetValueByPathParam/{id}")]
+    public string GetValueByPathParam(int id) // api/Name/GetOtherValue/5
+    {
+        return "value " + id.ToString();
+    }
+    
+    [AllowAnonymous]
     [HttpPost("authenticate")]
     public IActionResult Authenticate([FromBody] UserCred userCred)
     {
@@ -30,6 +42,6 @@ public class NameController: ControllerBase
             return Unauthorized();
         }
         
-        return Ok();
+        return Ok(token);
     }
 }

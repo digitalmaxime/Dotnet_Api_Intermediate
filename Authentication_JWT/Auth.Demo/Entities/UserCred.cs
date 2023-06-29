@@ -1,4 +1,4 @@
-﻿namespace Auth.Demo.Controllers;
+﻿namespace Auth.Demo.Entities;
 
 public class UserCred
 {
