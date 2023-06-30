@@ -1,5 +1,6 @@
 ﻿using Auth.Demo.Entities;
 using Auth.Demo.Services.AuthManager;
+using Auth.Demo.Services.CustomAuthManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace Auth.Demo.Controllers;
 public class NameController: ControllerBase
 {
     private readonly IJwtAuthenticationManager _jwtAuthenticationManager;
+    private readonly ICustomAuthManager _customAuthManager;
 
-    public NameController(IJwtAuthenticationManager jwtAuthenticationManager)
+    public NameController(IJwtAuthenticationManager jwtAuthenticationManager, ICustomAuthManager customAuthManager)
     {
         _jwtAuthenticationManager = jwtAuthenticationManager;
+        _customAuthManager = customAuthManager;
     }
 
     [HttpGet]
@@ -36,6 +39,20 @@ public class NameController: ControllerBase
     public IActionResult Authenticate([FromBody] UserCred userCred)
     {
         var token = _jwtAuthenticationManager.Authenticate(userCred.Username, userCred.Password);
+        
+        if (token == null)
+        {
+            return Unauthorized();
+        }
+        
+        return Ok(token);
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("AuthenticateWithCustomAuthenticationManager")]
+    public IActionResult AuthenticateWithCustomAuthenticationManager([FromBody] UserCred userCred)
+    {
+        var token = _customAuthManager.Authenticate(userCred.Username, userCred.Password);
         
         if (token == null)
         {

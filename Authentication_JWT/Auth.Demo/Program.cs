@@ -1,6 +1,8 @@
+using System.Net;
 using System.Text;
 using Auth.Demo.Config;
 using Auth.Demo.Services.AuthManager;
+using Auth.Demo.Services.CustomAuthManager;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -45,8 +47,13 @@ builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection("JwtOptions"))
     .ValidateDataAnnotations();
 
-builder.Services.AddSingleton<IJwtAuthenticationManager, JwtAuthenticationManager>();
+builder.Services
+    .AddAuthentication("Basic").AddScheme<BasicAuthenticationOptions, CustomAuthHandler>("Basic", null);
 
+builder.Services.AddSingleton<IJwtAuthenticationManager, JwtAuthenticationManager>();
+builder.Services.AddSingleton<ICustomAuthManager, CustomAuthManager>();
+
+/*
 builder.Services.AddAuthentication(authOptions =>
 {
     authOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -64,6 +71,7 @@ builder.Services.AddAuthentication(authOptions =>
         ValidateLifetime = true,
     };
 });
+*/
 
 var app = builder.Build();
 
