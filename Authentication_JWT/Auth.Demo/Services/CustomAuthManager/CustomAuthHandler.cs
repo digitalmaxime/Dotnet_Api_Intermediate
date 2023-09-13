@@ -45,7 +45,8 @@ public class CustomAuthHandler: AuthenticationHandler<BasicAuthenticationOptions
              return AuthenticateResult.Fail("Unauthorized");
          }
          
-         var token = authorizationHeader[0].Substring("bearer".Length).Trim();
+         // Extract the token from the request
+         var token = authorizationHeader[0]?.Substring("bearer".Length).Trim();
          // var token = authorizationHeader[0].Split(" ")[0];
          if (string.IsNullOrEmpty(token))
          {
@@ -66,22 +67,28 @@ public class CustomAuthHandler: AuthenticationHandler<BasicAuthenticationOptions
 
     private AuthenticateResult ValidateToken(string token)
     {
+        // Check in existing issued tokens if one matches the given token 
         var validatedToken = _customAuthenticationManager.Tokens.FirstOrDefault(t => t.Key == token);
         if (validatedToken.Key == null)
         {
             return AuthenticateResult.Fail("Unauthorized");
         }
+        
+        // If token matches issued token, check for the associated authorization associated with that token
 
         // Create an Identity
         // 1st create a claim
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, validatedToken.Value)
+            new Claim(ClaimTypes.Name, validatedToken.Value.Item1),
+            new Claim(ClaimTypes.Role, validatedToken.Value.Item2)
         };
         
         // 2nd create the identity
         var identity = new ClaimsIdentity(claims, Scheme.Name);
-        var principal = new GenericPrincipal(identity, null);
+        
+        // 3rd create a Principal
+        var principal = new GenericPrincipal(identity, new [] {validatedToken.Value.Item2} );
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
         return AuthenticateResult.Success(ticket);
     }

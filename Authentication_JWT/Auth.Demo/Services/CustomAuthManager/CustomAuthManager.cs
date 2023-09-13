@@ -4,35 +4,48 @@ using Microsoft.Extensions.Options;
 
 namespace Auth.Demo.Services.CustomAuthManager;
 
-public class CustomAuthManager: ICustomAuthManager
+public class CustomAuthManager : ICustomAuthManager
 {
     private readonly JwtOptions _jwtOptions;
 
-    private readonly IDictionary<string, string> _users = new Dictionary<string, string>
+    private readonly IList<User> _users = new List<User>
     {
-        {"test1", "password1"}, {"test2", "password2"}
+        new User() { Username = "test1", Password = "password1", Role = "Administrator" },
+        new User() { Username = "test2", Password = "password2", Role = "User" }
     };
 
-    private readonly IDictionary<string, string> tokens = new Dictionary<string, string>();
+    private readonly IDictionary<string, Tuple<string, string>> _tokens =
+        new Dictionary<string, Tuple<string, string>>(); // Tokens contain key (guid) and value (username and role)
 
-    public IDictionary<string, string> Tokens => tokens;
-    
-    public CustomAuthManager(IOptions<JwtOptions> jwtOptions )
+    public IDictionary<string, Tuple<string, string>> Tokens => _tokens;
+
+    public CustomAuthManager(IOptions<JwtOptions> jwtOptions)
     {
         _jwtOptions = jwtOptions.Value; // private key provided in Startup, used for encrypting the token
     }
-    
-    public string Authenticate(string username, string password)
+
+    public string? Authenticate(string username, string password)
     {
-        if (!_users.Any(u => u.Key == username && u.Value == password))
+        if (!_users.Any(u => u.Username == username && u.Password == password))
         {
             return null;
         }
-        
+
         var token = Guid.NewGuid().ToString();
-        
-        tokens.Add(token, username); //instead of an in-memory dictionary, it should ideally be stored in a Redis Cache
-        
+
+        _tokens.Add(token,
+            new Tuple<string, string>(
+                username,
+                _users.FirstOrDefault(u => u.Username == username && u.Password == password).Role
+            )); //instead of an in-memory dictionary, it should ideally be stored in a Redis Cache
+
         return token;
     }
+}
+
+internal class User
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string Role { get; set; }
 }
