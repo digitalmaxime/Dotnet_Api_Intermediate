@@ -1,0 +1,7 @@
+// Validating benchmarks:
+//    * Assembly BenchmarkDotNetDemo which defines benchmarks is non-optimized
+Benchmark was built without optimization enabled (most probably a DEBUG configuration). Please, build it in RELEASE.
+If you want to debug the benchmarks, please see https://benchmarkdotnet.org/articles/guides/troubleshooting.html#debugging-benchmarks.
+
+//    * Unable to use TextSearchBenchmark.statements with [Params] because it's not public. Please, make it public.
+
