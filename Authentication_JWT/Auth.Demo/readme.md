@@ -49,6 +49,7 @@ builder.Services.AddAuthentication(authOptions =>
 
 ---
 <h2>Project References</h2>
+
 ```
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
