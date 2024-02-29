@@ -1,13 +1,14 @@
 # Caching Decorator
 
-Project demonstrating simple caching with decorator pattern
+Project demonstrating simple caching with decorator pattern 
+
+Working with In-Memory database
 
 ## Implementation steps
-1) [Define the model classes](#model)
-2) [Add required pacakges](#packages)
-3) [Create the decorator class](#decorator)
-4) [DI the decorator class](#di)
-5) [Enable caching](#caching)
+1) [Add required pacakges](#packages)
+1) [Create the decorator class](#decorator)
+1) [DI the decorator class](#di)
+1) [Enable caching](#caching)
 
 ## Packages
 

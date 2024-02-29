@@ -3,9 +3,9 @@ using SimpleCaching.Entities;
 
 namespace SimpleCaching.Repositories.Contexts;
 
-public class ProductContext: DbContext
+public class ProductContext : DbContext
 {
-    public ProductContext(DbContextOptions options): base(options)
+    public ProductContext(DbContextOptions options) : base(options)
     {
     }
 
@@ -15,6 +15,6 @@ public class ProductContext: DbContext
 
         modelBuilder.Entity<Product>().Property(p => p.Id).IsRequired();
     }
-    
+
     public DbSet<Product> Products { get; set; }
 }

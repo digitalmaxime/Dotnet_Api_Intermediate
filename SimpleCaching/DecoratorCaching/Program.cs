@@ -7,9 +7,14 @@ using SimpleCaching.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ProductContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException()));
-    // options.UseInMemoryDatabase("ProductsDb"));
+builder.Services.AddDbContext<ProductContext>();
+
+var options = new DbContextOptionsBuilder<ProductContext>()
+    .UseInMemoryDatabase("ProductsDb").Options;
+using (var context = new ProductContext(options))
+{
+    context.Database.EnsureCreated();
+}
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IProductService, ProductService>();
