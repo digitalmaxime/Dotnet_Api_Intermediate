@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCaching", "SimpleCaching\SimpleCaching.csproj", "{D1988CD8-073F-41DB-A1EA-80C9B07D3924}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DecoratorCaching", "DecoratorCaching\DecoratorCaching.csproj", "{D1988CD8-073F-41DB-A1EA-80C9B07D3924}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

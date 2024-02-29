@@ -16,12 +16,22 @@ public class ProductServiceCacheDecorator: IProductService
     }
     public async Task<List<Product>> GetAllProductsAsync()
     {
+
+        var cacheKey = nameof(GetAllProductsAsync);
+        
+        return await _memoryCache.GetOrCreateAsync<List<Product>>(
+            cacheKey,
+            cacheEntry =>
+            {
+                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(30);
+                return _productService.GetAllProductsAsync();
+            }) ?? new List<Product>();
+        
+        
         var options = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromSeconds(30))
             .SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
-
-        var cacheKey = nameof(GetAllProductsAsync);
-
+        
         if (_memoryCache.TryGetValue(cacheKey, out List<Product>? result))
         {
             if (result != null) return result;
