@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ProductContext>();
 
 var options = new DbContextOptionsBuilder<ProductContext>()
     .UseInMemoryDatabase("ProductsDb").Options;
+
 using (var context = new ProductContext(options))
 {
     context.Database.EnsureCreated();
