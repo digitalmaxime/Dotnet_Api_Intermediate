@@ -9,14 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ProductContext>(o => o.UseInMemoryDatabase("ProductsDb"));
 
-var options = new DbContextOptionsBuilder<ProductContext>()
-    .UseInMemoryDatabase("ProductsDb").Options;
-
-using (var context = new ProductContext(options))
-{
-    context.Database.EnsureCreated();
-}
-
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.Decorate<IProductService, ProductServiceCacheDecorator>();
@@ -25,6 +17,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+using (var context = scope.ServiceProvider.GetService<ProductContext>()) context?.Database.EnsureCreated();
 
 if (app.Environment.IsDevelopment())
 {
