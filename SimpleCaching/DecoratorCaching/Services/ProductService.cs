@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using SimpleCaching.Contexts;
 using SimpleCaching.Entities;
 using SimpleCaching.Repositories.Contexts;
 
@@ -12,12 +13,10 @@ public interface IProductService
 
 public class ProductService : IProductService
 {
-    private readonly IMemoryCache _cache;
     private readonly ProductContext _productContext;
 
-    public ProductService(IMemoryCache cache, ProductContext productContext)
+    public ProductService(ProductContext productContext)
     {
-        _cache = cache;
         _productContext = productContext;
     }
 

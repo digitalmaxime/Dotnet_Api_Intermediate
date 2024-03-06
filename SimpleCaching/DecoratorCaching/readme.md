@@ -6,9 +6,9 @@ Working with In-Memory database
 
 ## Implementation steps
 1) [Add required pacakges](#packages)
-1) [Create the decorator class](#decorator)
-1) [DI the decorator class](#di)
-1) [Enable caching](#caching)
+2) [Create the decorator class](#decorator)
+3) [DI the decorator class](#di)
+4) [Enable caching](#caching)
 
 ## Packages
 

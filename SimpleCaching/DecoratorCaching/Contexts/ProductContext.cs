@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SimpleCaching.Entities;
 
-namespace SimpleCaching.Repositories.Contexts;
+namespace SimpleCaching.Contexts;
 
 public class ProductContext : DbContext
 {

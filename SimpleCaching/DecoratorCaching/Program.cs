@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using SimpleCaching.Contexts;
 using SimpleCaching.Decorators;
 using SimpleCaching.Entities;
-using SimpleCaching.Repositories.Contexts;
 using SimpleCaching.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ProductContext>();
+builder.Services.AddDbContext<ProductContext>(o => o.UseInMemoryDatabase("ProductsDb"));
 
 var options = new DbContextOptionsBuilder<ProductContext>()
     .UseInMemoryDatabase("ProductsDb").Options;
