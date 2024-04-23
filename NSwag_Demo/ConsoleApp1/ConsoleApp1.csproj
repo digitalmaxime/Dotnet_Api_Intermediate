@@ -11,4 +11,8 @@
       <ProjectReference Include="..\WebApplication1\WebApplication1.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="MyClient2.cs" />
+    </ItemGroup>
+
 </Project>

@@ -15,4 +15,9 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="NSwag\nswag.json" />
+      <_ContentIncludedByDefault Remove="NSwag\OpenApiSpec.json" />
+    </ItemGroup>
+
 </Project>

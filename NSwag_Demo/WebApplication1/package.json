@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "generate-client": "nswag openapi2csclient /input:https://localhost:7067/swagger/v1/swagger.json /classname:MyClient /namespace:MyNamespace /output:MyClient.cs /JsonLibrary:SystemTextJson /GenerateClientInterfaces:true /UseBaseUrl:false"
+  },
+  "dependencies": {
+    "nswag": "^14.0.7"
+  }
+}

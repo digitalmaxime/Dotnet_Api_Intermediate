@@ -14,7 +14,8 @@ nswag openapi2csclient \
 /namespace:MyNamespace \
 /output:MyClient.cs \
 /JsonLibrary:SystemTextJson \
-/GenerateClientInterfaces:true
+/GenerateClientInterfaces:true \
+/UseBaseUrl:false
 ```
 
 # NSwag CLI (with nswag.json)
