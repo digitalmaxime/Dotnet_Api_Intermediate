@@ -1,0 +1,4 @@
+@SimpleCaching_HostAddress = http://localhost:5061
+
+GET {{SimpleCaching_HostAddress}}/weatherforecast/
+Accept: application/json
