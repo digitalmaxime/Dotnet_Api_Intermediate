@@ -34,6 +34,8 @@ also make sure that the dotnet sdk matches
 
 this creates a cs client 
 
-# Security
+# Refitter
 
-`dotnet user-jwts create`
+Alternatively, you can use Refit to generate a client
+[Refit CLI](https://refitter.github.io/articles/cli-tool.html)
+
