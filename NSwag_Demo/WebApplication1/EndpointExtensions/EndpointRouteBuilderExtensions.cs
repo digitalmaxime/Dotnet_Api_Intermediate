@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.EndpointExtensions;
 
@@ -11,16 +13,16 @@ public static class EndpointRouteBuilderExtensions
     public static void RegisterFoodEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var foodEndpoints = endpointRouteBuilder
-            .MapGroup("/food");
+            .MapGroup("/api/v1");
 
-        foodEndpoints.MapGet("/api/foods", async (IGroceryService service) =>
+        foodEndpoints.MapGet("/foods", async (IGroceryService service) =>
             {
                 var foods = await service.GetAllFoods();
                 return TypedResults.Ok(foods);
             })
             .WithName("GetAllFoods");
 
-        foodEndpoints.MapGet("/api/food/{name}",
+        foodEndpoints.MapGet("/food/{name}",
                 async Task<Results<Ok<Food>, NotFound>>([FromRoute] string name, IGroceryService service) =>
                 {
                     var food = await service.GetFoodByName(name);
@@ -28,7 +30,7 @@ public static class EndpointRouteBuilderExtensions
                 })
             .WithName("GetFood");
 
-        foodEndpoints.MapPost("/api/food/",
+        foodEndpoints.MapPost("/",
                 async Task<Results<Created<ICollection<Food>>, BadRequest>>([FromBody] Food food,
                     IGroceryService service) =>
                 {

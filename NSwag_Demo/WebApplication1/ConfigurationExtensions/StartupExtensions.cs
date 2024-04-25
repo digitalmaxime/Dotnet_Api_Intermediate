@@ -1,6 +1,8 @@
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.ConfigurationExtensions;
 
@@ -18,8 +20,8 @@ public static class StartupExtensions
     
         });
         
-        builder.Services.AddAuthorization();
         builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+        builder.Services.AddAuthorization();
         
         return builder;
     }

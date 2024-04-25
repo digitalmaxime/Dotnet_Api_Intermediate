@@ -104,8 +104,8 @@ namespace MyNamespace
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                 
-                    // Operation Path: "food/api/foods"
-                    urlBuilder_.Append("food/api/foods");
+                    // Operation Path: "api/v1/foods"
+                    urlBuilder_.Append("api/v1/foods");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -185,8 +185,8 @@ namespace MyNamespace
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                 
-                    // Operation Path: "food/api/food/{name}"
-                    urlBuilder_.Append("food/api/food/");
+                    // Operation Path: "api/v1/food/{name}"
+                    urlBuilder_.Append("api/v1/food/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(name, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -277,8 +277,8 @@ namespace MyNamespace
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                 
-                    // Operation Path: "food/api/food"
-                    urlBuilder_.Append("food/api/food");
+                    // Operation Path: "api/v1"
+                    urlBuilder_.Append("api/v1");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 

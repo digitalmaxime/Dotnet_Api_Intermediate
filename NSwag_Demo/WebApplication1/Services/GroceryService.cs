@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Models;
 
-namespace WebApplication1;
+namespace WebApplication1.Services;
 
 public class GroceryService : IGroceryService
 {
@@ -10,17 +11,7 @@ public class GroceryService : IGroceryService
     {
         _foodContext = foodContext;
     }
-    // private readonly List<Food> _foods = new()
-    // {
-    //     new Food()
-    //     {
-    //         Name = "Carrot", Quantity = 2
-    //     },
-    //     new Food()
-    //     {
-    //         Name = "Tofu", Quantity = 1
-    //     }
-    // };
+    
     public async Task<ICollection<Food>> GetAllFoods()
     {
         return await _foodContext.Foods.ToArrayAsync();

@@ -32,7 +32,7 @@ also make sure that the dotnet sdk matches
 
 `nswag run nswag.json`
 
-this creates a cs client 
+this creates a cs client
 
 # Refitter
 
