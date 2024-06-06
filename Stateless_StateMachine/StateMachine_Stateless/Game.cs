@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Car_StateMachine.CarStateManagerFactory;
+using CarStateMachine.CarStateManagerFactory;
 
 namespace Car_StateMachine;
 
@@ -11,7 +11,6 @@ public class Game
     {
         _createManagerFactory = createManagerFactory;
     }
-    
     
     public void Start(string type)
     {

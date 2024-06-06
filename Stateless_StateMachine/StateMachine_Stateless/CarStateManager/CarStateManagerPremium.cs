@@ -1,4 +1,6 @@
-namespace Car_StateMachine;
+using Car_StateMachine;
+
+namespace CarStateMachine.CarStateManager;
 
 public class CarStateManagerPremium: ICarStateManager
 {
