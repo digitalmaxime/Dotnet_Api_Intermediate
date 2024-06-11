@@ -17,18 +17,18 @@ public class BasicCarStateManager : ICarStateManager
         var speed = 1;
         if (input == "Accelerate")
         {
-            Console.Write($"Enter speed greater than current speed {Car.CurrentSpeed} : ");
+            Console.Write($"Enter speed greater than current speed {CarStateMachine.CurrentSpeed} : ");
             var parseSuccessful = TryParse(Console.ReadLine(), out var inputtedSpeed);
-            if (!parseSuccessful || inputtedSpeed < Car.CurrentSpeed)
+            if (!parseSuccessful || inputtedSpeed < CarStateMachine.CurrentSpeed)
                 throw new ArgumentException("Invalid argument for Speed");
             speed = inputtedSpeed;
         }
 
         if (input == "Decelerate")
         {
-            Console.Write($"Enter speed < {Car.CurrentSpeed} : ");
+            Console.Write($"Enter speed < {CarStateMachine.CurrentSpeed} : ");
             var parseSuccessful = TryParse(Console.ReadLine(), out var inputedSpeed);
-            if (!parseSuccessful || inputedSpeed > Car.CurrentSpeed)
+            if (!parseSuccessful || inputedSpeed > CarStateMachine.CurrentSpeed)
                 throw new ArgumentException("Invalid argument for Speed");
             speed = inputedSpeed;
         }
@@ -36,19 +36,19 @@ public class BasicCarStateManager : ICarStateManager
         switch (action)
         {
             case Action.Stop:
-                Car.CarState.Fire(Action.Stop);
+                CarStateMachine.CarState.Fire(Action.Stop);
                 break;
 
             case Action.Start:
-                Car.CarState.Fire(Action.Start);
+                CarStateMachine.CarState.Fire(Action.Start);
                 break;
 
             case Action.Accelerate:
-                Car.CarState.Fire(Car.AccelerateWithParam, Min(speed, 100));
+                CarStateMachine.CarState.Fire(CarStateMachine.AccelerateWithParam, Min(speed, 100));
                 break;
 
             case Action.Decelerate:
-                Car.CarState.Fire(Car.DecelerateWithParam, Max(speed, 0));
+                CarStateMachine.CarState.Fire(CarStateMachine.DecelerateWithParam, Max(speed, 0));
                 break;
 
             default:
