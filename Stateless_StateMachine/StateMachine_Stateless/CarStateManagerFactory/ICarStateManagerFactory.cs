@@ -2,7 +2,12 @@ using CarStateMachine.CarStateManager;
 
 namespace CarStateMachine.CarStateManagerFactory;
 
+public enum CarType
+{
+    Basic,
+    Flying
+}
 public interface ICarStateManagerFactory
 {
-    ICarStateManager GetCarStateManager(string type);
+    ICarStateManager GetCarStateManager(CarType type);
 }

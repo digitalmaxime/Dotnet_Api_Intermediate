@@ -1,7 +1,7 @@
 using System.Text.Json;
 using CarStateMachine.CarStateManagerFactory;
 
-namespace Car_StateMachine;
+namespace CarStateMachine;
 
 public class Game
 {
@@ -10,12 +10,16 @@ public class Game
     public Game(ICarStateManagerFactory createManagerFactory)
     {
         _createManagerFactory = createManagerFactory;
+        Init();
     }
-    
-    public void Start(string type)
+
+    private void Init()
     {
         Car.ConfigureCarStates();
-
+    }
+    
+    public void Start(CarType type)
+    {
         var carStateManager = _createManagerFactory.GetCarStateManager(type);
         
         string? input;

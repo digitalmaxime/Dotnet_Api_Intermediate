@@ -1,4 +1,4 @@
-namespace Car_States_Actions;
+namespace CarStateMachine;
 
 public enum Action
 {

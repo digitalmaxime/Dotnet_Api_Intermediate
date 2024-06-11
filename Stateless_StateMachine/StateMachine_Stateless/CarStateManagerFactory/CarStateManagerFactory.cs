@@ -1,16 +1,15 @@
-using Car_StateMachine.CarStateManager;
 using CarStateMachine.CarStateManager;
 
 namespace CarStateMachine.CarStateManagerFactory;
 
 public class CarStateManagerFactory: ICarStateManagerFactory
 {
-    public ICarStateManager GetCarStateManager(string type)
+    public ICarStateManager GetCarStateManager(CarType type)
     {
         return type switch
         {
-            "Basic" => new CarStateManagerBasic(),
-            "Premium" => new CarStateManagerPremium(),
+            CarType.Basic => new BasicCarStateManager(),
+            CarType.Flying => new FlyingCarStateManager(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

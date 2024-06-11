@@ -1,8 +1,6 @@
-using Car_States_Actions;
 using Stateless;
-using Action = Car_States_Actions.Action;
 
-namespace Car_StateMachine;
+namespace CarStateMachine;
 
 public static class Car
 {
@@ -31,7 +29,7 @@ public static class Car
 
         CarState?.Configure(State.Stopped)
             .Permit(Action.Start, State.Started)
-            .Ignore(Action.Stop) // --> same as .PermitReentry(Action.Stop)
+            // .Ignore(Action.Stop) // --> same as .PermitReentry(Action.Stop)
             .OnEntry((state) =>
             {
                 Car.CurrentSpeed = 0;
@@ -57,32 +55,21 @@ public static class Car
                 CurrentSpeed = speed;
                 Console.WriteLine($"\tSpeed is {speed}");
             })
+            .PermitIf(Action.Stop, State.Stopped, () => CurrentSpeed == 0)
+            .PermitIf(Action.Fly, State.Flying,  () => CurrentSpeed > 100)
             .InternalTransition<int>(AccelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
                 Console.WriteLine($"\tSpeed is {speed}");
             })
-            .InternalTransition<int>(DecelerateWithParam, (speed, _) =>
+            .InternalTransitionIf<int>(DecelerateWithParam, (speed) => CurrentSpeed > 0, (speed, _) =>
             {
                 CurrentSpeed = speed;
                 Console.WriteLine($"\tSpeed is {speed}");
             })
             ;
 
-        CarState?.Configure(State.Speeding)
-            .OnEntryFrom(AccelerateWithParam, (speed) =>
-            {
-                CurrentSpeed = speed;
-                Console.WriteLine($"\tSpeed is {speed}");
-            })
-            .Permit(Action.Decelerate, State.Running)
-            .Permit(Action.Fly, State.Flying)
-            .InternalTransition(Action.Fly,
-                () => Console.WriteLine("\tInternalTransition Fly, qu'est-ce que c'est? while Speeding"));
-
         CarState?.Configure(State.Flying)
-            .Permit(Action.Land, State.Speeding)
-            .InternalTransition(Action.Land,
-                () => Console.WriteLine("\tInternalTransition Land, qu'est-ce que c'est? while Flying"));
+            .Permit(Action.Land, State.Running);
     }
 }

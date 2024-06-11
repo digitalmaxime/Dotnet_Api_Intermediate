@@ -1,4 +1,4 @@
-﻿using Car_StateMachine;
+﻿using System.Text.Json;
 using CarStateMachine;
 using CarStateMachine.CarStateManagerFactory;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +14,10 @@ var app = builder.Build();
 
 var game = app.Services.GetService<Game>();
 
-// Console.WriteLine("Basic or Premium?");
-//
-// var type = Console.ReadLine();
+var availableCarTypes = JsonSerializer.Serialize(Enum.GetNames<CarType>());
 
-game!.Start("Basic");
+Console.Write($"Choose a car type : {availableCarTypes} : ");
+
+var success = Enum.TryParse<CarType>(Console.ReadLine(), out var type);
+
+game!.Start(success ? type : CarType.Basic);
