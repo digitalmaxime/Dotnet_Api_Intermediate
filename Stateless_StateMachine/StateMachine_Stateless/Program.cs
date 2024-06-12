@@ -17,6 +17,10 @@ builder.Services.AddSingleton<Game>();
 
 var app = builder.Build();
 
+var dbContext = app.Services.GetService<CarStateDbContext>();
+
+dbContext?.Database.EnsureCreated();
+
 var game = app.Services.GetService<Game>();
 
 var availableCarTypes = JsonSerializer.Serialize(Enum.GetNames<CarType>());
