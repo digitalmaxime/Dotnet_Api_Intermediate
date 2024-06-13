@@ -5,20 +5,17 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ***************** Reading Configuration AppSettings
-
 var validIssuerConfig = builder.Configuration.GetValue<string>("Security:ValidIssuer");
 Console.WriteLine("---------------");
 Console.WriteLine(validIssuerConfig);
 Console.WriteLine("---------------");
-
 
 var myKeyValue = builder.Configuration["MyKey"];
 var title = builder.Configuration["Position:Title"];
@@ -44,9 +41,9 @@ positionOptions = builder.Configuration.GetSection(PositionOptions.Position)
 Console.WriteLine($"Title: {positionOptions.Title} \n" +
                   $"Name: {positionOptions.Name}");
 */
+
 builder.Services.Configure<PositionOptions>(
     builder.Configuration.GetSection(PositionOptions.Position));
-
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

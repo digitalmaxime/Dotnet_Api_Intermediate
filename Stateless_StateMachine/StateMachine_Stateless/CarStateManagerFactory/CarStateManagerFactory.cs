@@ -4,7 +4,7 @@ namespace CarStateMachine.CarStateManagerFactory;
 
 public class CarStateManagerFactory: ICarStateManagerFactory
 {
-    public ICarStateManager GetCarStateManager(CarType type)
+    public CarStateManager.CarStateManagerBase GetCarStateManager(CarType type)
     {
         return type switch
         {

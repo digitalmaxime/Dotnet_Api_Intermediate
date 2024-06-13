@@ -9,5 +9,5 @@ public enum CarType
 }
 public interface ICarStateManagerFactory
 {
-    ICarStateManager GetCarStateManager(CarType type);
+    CarStateManager.CarStateManagerBase GetCarStateManager(CarType type);
 }
