@@ -19,7 +19,10 @@ var app = builder.Build();
 
 var dbContext = app.Services.GetService<CarStateDbContext>();
 
-dbContext?.Database.EnsureCreated();
+if (dbContext != null)
+{
+    await dbContext.Database.EnsureCreatedAsync();
+}
 
 var game = app.Services.GetService<Game>();
 

@@ -20,11 +20,11 @@ public class Game
     {
         var carStateManager = _createManagerFactory.GetCarStateManager(type);
 
-        var carEntity = _carStateRepository.Get("Name1");
+        var carEntity = _carStateRepository.GetByName("Name1");
 
         Debug.Assert(carEntity != null, nameof(carEntity) + " != null");
         
-        var car = new Car(carEntity.Name, _carStateRepository);
+        var car = new Car(carEntity.Name, carEntity.State, carEntity.Speed, _carStateRepository);
         
         string? input;
         do

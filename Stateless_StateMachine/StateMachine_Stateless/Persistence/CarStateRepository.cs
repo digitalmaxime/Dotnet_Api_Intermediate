@@ -4,7 +4,7 @@ public interface ICarStateRepository
 {
     void Save(string name, Car.State state, int speed);
 
-    CarEntity? Get(string name);
+    CarEntity? GetByName(string name);
 }
 
 public class CarStateRepository : ICarStateRepository
@@ -28,7 +28,7 @@ public class CarStateRepository : ICarStateRepository
         _dbContext.SaveChanges();
     }
 
-    public CarEntity? Get(string name)
+    public CarEntity? GetByName(string name)
     {
         return _dbContext.CarEntity.FirstOrDefault(c => c.Name == name);
     }

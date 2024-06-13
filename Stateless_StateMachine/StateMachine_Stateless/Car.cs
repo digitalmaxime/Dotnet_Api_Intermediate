@@ -27,16 +27,12 @@ public class Car
         Land
     }
 
-    public string Name { get; set; }
+    private string Name { get; set; }
     
-    private State _currentState { get; set; }
     public State CurrentState
     {
-        get => _currentState;
-        private set
-        {
-            _currentState = value;
-        }
+        get;
+        private set;
     }
 
     public int CurrentSpeed { get; private set; }
@@ -47,19 +43,19 @@ public class Car
     private StateMachine<State, Action>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<State, Action>.TriggerWithParameters<int>? _decelerateWithParam;
 
-    public Car(string name, ICarStateRepository carStateRepository)
+    public Car(string name, State state, int speed, ICarStateRepository carStateRepository)
     {
         _carStateRepository = carStateRepository;
         Name = name;
-        CurrentState = State.Stopped;//_carStateRepository.Get(Name).State;
+        CurrentState = state;
+        CurrentSpeed = speed;
         
         _carState = new StateMachine<State, Action>(
             () =>
-                // _carStateRepository.Get(Name).State,
                 CurrentState,
-            (state) =>
+            (s) =>
             {
-                CurrentState = state;
+                CurrentState = s;
                 SaveState();
             }
             );
@@ -72,7 +68,7 @@ public class Car
         _carStateRepository?.Save(Name, CurrentState, CurrentSpeed);
     }
 
-    public static void PrintState(StateMachine<State, Action>.Transition state)
+    private static void PrintState(StateMachine<State, Action>.Transition state)
     {
         Console.WriteLine(
             $"\tOnEntry/OnExit\n\tState Source : {state.Source}, " +
@@ -93,8 +89,7 @@ public class Car
                 CurrentSpeed = 0;
                 PrintState(state);
             })
-            .OnExit(PrintState)
-            ;
+            .OnExit(PrintState);
 
         _carState.Configure(State.Started)
             .Permit(Action.Accelerate, State.Running)
@@ -104,8 +99,7 @@ public class Car
                 CurrentSpeed = 0;
                 PrintState(state);
             })
-            .OnExit(PrintState)
-            ;
+            .OnExit(PrintState);
 
         _carState.Configure(State.Running)
             .OnEntryFrom(_accelerateWithParam, (speed, _) =>
@@ -120,14 +114,13 @@ public class Car
             {
                 CurrentSpeed = speed;
                 SaveState();
-                Console.WriteLine($"\tSpeed is {speed}");
+                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             })
-            .InternalTransitionIf<int>(_decelerateWithParam, (speed) => CurrentSpeed > 0, (speed, _) =>
+            .InternalTransitionIf<int>(_decelerateWithParam, _ => CurrentSpeed > 0, (speed, _) =>
             {
                 CurrentSpeed = speed;
                 Console.WriteLine($"\tSpeed is {CurrentSpeed}");
-            })
-            ;
+            });
 
         _carState?.Configure(State.Flying)
             .Permit(Action.Land, State.Running);
