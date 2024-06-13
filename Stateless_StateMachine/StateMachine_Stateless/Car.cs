@@ -7,6 +7,8 @@ namespace CarStateMachine;
 
 public class Car
 {
+    private readonly ICarStateRepository _carStateRepository;
+
     public enum State
     {
         Stopped,
@@ -26,7 +28,17 @@ public class Car
     }
 
     public string Name { get; set; }
-    public State CurrentState => _carState.State;
+    
+    private State _currentState { get; set; }
+    public State CurrentState
+    {
+        get => _currentState;
+        private set
+        {
+            _currentState = value;
+        }
+    }
+
     public int CurrentSpeed { get; private set; }
 
     private readonly StateMachine<State, Action> _carState;
@@ -37,22 +49,33 @@ public class Car
 
     public Car(string name, ICarStateRepository carStateRepository)
     {
-        var carStateRepository1 = carStateRepository;
+        _carStateRepository = carStateRepository;
         Name = name;
+        CurrentState = State.Stopped;//_carStateRepository.Get(Name).State;
+        
         _carState = new StateMachine<State, Action>(
-                () =>
-                    carStateRepository1.Get(Name).State,
-                (state) =>
-                    carStateRepository1?.Save(Name, state, CurrentSpeed)
+            () =>
+                // _carStateRepository.Get(Name).State,
+                CurrentState,
+            (state) =>
+            {
+                CurrentState = state;
+                SaveState();
+            }
             );
 
         ConfigureCarStates();
     }
 
+    private void SaveState()
+    {
+        _carStateRepository?.Save(Name, CurrentState, CurrentSpeed);
+    }
+
     public static void PrintState(StateMachine<State, Action>.Transition state)
     {
         Console.WriteLine(
-            $"\tOnExit/OnExit\n\tState Source : {state.Source}, " +
+            $"\tOnEntry/OnExit\n\tState Source : {state.Source}, " +
             $"State Trigger : {state.Trigger}, " +
             $"State destination : {state.Destination}");
     }
@@ -88,19 +111,21 @@ public class Car
             .OnEntryFrom(_accelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
-                Console.WriteLine($"\tSpeed is {speed}");
+                SaveState();
+                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             })
             .PermitIf(Action.Stop, State.Stopped, () => CurrentSpeed == 0)
             .PermitIf(Action.Fly, State.Flying, () => CurrentSpeed > 100)
             .InternalTransition<int>(_accelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
+                SaveState();
                 Console.WriteLine($"\tSpeed is {speed}");
             })
             .InternalTransitionIf<int>(_decelerateWithParam, (speed) => CurrentSpeed > 0, (speed, _) =>
             {
                 CurrentSpeed = speed;
-                Console.WriteLine($"\tSpeed is {speed}");
+                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             })
             ;
 

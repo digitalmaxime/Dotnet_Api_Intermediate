@@ -23,7 +23,7 @@ public class CarStateRepository : ICarStateRepository
         if (carEntity == null) return;
         
         carEntity.State = state;
-        carEntity.Speed = speed; // TODO: BUG !!!
+        carEntity.Speed = speed;
         
         _dbContext.SaveChanges();
     }
