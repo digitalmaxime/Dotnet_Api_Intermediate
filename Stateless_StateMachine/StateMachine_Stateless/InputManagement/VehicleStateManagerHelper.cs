@@ -1,7 +1,4 @@
-using Stateless.Reflection;
-using static System.Int32;
-
-namespace CarStateMachine.CarStateManager;
+namespace StateMachine.InputManagement;
 
 public static class VehicleStateManagerHelper
 {

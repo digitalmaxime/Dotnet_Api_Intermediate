@@ -1,10 +1,12 @@
-namespace CarStateMachine.Persistence;
+using StateMachine.VehicleStateMachines;
+
+namespace StateMachine.Persistence;
 
 public interface IVehicleStateRepository
 {
     void Save(string name, State state, int speed);
 
-    CarEntity? GetByName(string name);
+    VehicleEntity? GetByName(string name);
 }
 
 public class VehicleStateRepository : IVehicleStateRepository
@@ -28,7 +30,7 @@ public class VehicleStateRepository : IVehicleStateRepository
         _dbContext.SaveChanges();
     }
 
-    public CarEntity? GetByName(string name)
+    public VehicleEntity? GetByName(string name)
     {
         return _dbContext.CarEntity.FirstOrDefault(c => c.Name == name);
     }

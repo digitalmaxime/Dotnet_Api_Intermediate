@@ -1,6 +1,8 @@
-namespace CarStateMachine.Persistence;
+using StateMachine.VehicleStateMachines;
 
-public class CarEntity
+namespace StateMachine.Persistence;
+
+public class VehicleEntity
 {
     public string Name { get; set; } = default!; // PK
     public int Speed { get; set; }

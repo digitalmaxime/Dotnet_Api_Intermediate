@@ -1,8 +1,7 @@
+using StateMachine.Persistence;
 using static System.Int32;
-using CarStateMachine.Persistence;
 
-namespace CarStateMachine;
-
+namespace StateMachine.VehicleStateMachines;
 
 public class CarStateMachine : VehicleStateMachineBase
 {
@@ -13,25 +12,30 @@ public class CarStateMachine : VehicleStateMachineBase
         switch (action)
         {
             case Action.Accelerate:
-                StateMachine.Accelerate(Min(speed ?? -1, 100));
+                StateMachine.Fire(AccelerateWithParam, Min(CurrentSpeed + 25, 100));
                 return;
 
             case Action.Decelerate:
-                StateMachine.Decelerate(Max(speed ?? -1, 0));
+                StateMachine.Fire(DecelerateWithParam, Max(CurrentSpeed - 25, 0));
                 return;
             default:
-                throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                throw new ArgumentOutOfRangeException(nameof(action), action, $"{nameof(CarStateMachine)} does not support {action}");
         }
     }
 
     public sealed override int CurrentSpeed { get; set; }
 
-    public CarStateMachine(CarEntity carEntity, IVehicleStateRepository vehicleStateRepository)
+    public CarStateMachine(VehicleEntity vehicleEntity, IVehicleStateRepository vehicleStateRepository)
         : base(vehicleStateRepository)
     {
-        Name = carEntity.Name;
-        CurrentState = carEntity.State;
-        CurrentSpeed = carEntity.Speed;
+        Name = vehicleEntity.Name;
+        CurrentState = vehicleEntity.State;
+        CurrentSpeed = vehicleEntity.Speed;
+    }
+
+    ~CarStateMachine()
+    {
+        Console.WriteLine("~CarStateMachine xox");
     }
 
     protected override void ConfigureStates()
@@ -47,7 +51,6 @@ public class CarStateMachine : VehicleStateMachineBase
                 Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             })
             .PermitIf(Action.Stop, State.Stopped, () => CurrentSpeed == 0)
-            .PermitIf(Action.Fly, State.Flying, () => CurrentSpeed > 100)
             .InternalTransition<int>(AccelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
@@ -59,30 +62,5 @@ public class CarStateMachine : VehicleStateMachineBase
                 CurrentSpeed = speed;
                 Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             });
-
-        StateMachine?.Configure(State.Flying)
-            .Permit(Action.Land, State.Running);
-
-        // string graph = UmlDotGraph.Format(CarState.GetInfo());
     }
-
-    public void Accelerate(int speed)
-    {
-        StateMachine.Fire(AccelerateWithParam, speed);
-    }
-
-    public void Decelerate(int speed)
-    {
-        StateMachine.Fire(DecelerateWithParam, Max(speed, 0));
-    }
-
-    // public void Fly()
-    // {
-    //     CarState.Fire(Action.Fly);
-    // }
-    //
-    // public void Land()
-    // {
-    //     CarState.Fire(Action.Land);
-    // }
 }

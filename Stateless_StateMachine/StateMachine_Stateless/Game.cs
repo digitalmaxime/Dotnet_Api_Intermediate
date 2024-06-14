@@ -1,53 +1,58 @@
 using System.Diagnostics;
 using System.Text.Json;
-using CarStateMachine.CarStateManager;
-using CarStateMachine.CarStateManagerFactory;
-using CarStateMachine.Persistence;
+using StateMachine.InputManagement;
+using StateMachine.Persistence;
+using StateMachine.VehicleStateMachineFactory;
 
-namespace CarStateMachine;
+namespace StateMachine;
 
 public class Game
 {
-    private readonly IVehicleStateMachineBase _carStateMachine;
-    private readonly IVehicleStateManagerFactory _createManagerFactory;
     private readonly IVehicleStateRepository _vehicleStateRepository;
+    private readonly IVehicleFactory _vehicleFactory;
 
-    public Game(IVehicleStateMachineBase carStateMachine, IVehicleStateManagerFactory createManagerFactory,
-        IVehicleStateRepository vehicleStateRepository)
+    public Game( 
+        IVehicleStateRepository vehicleStateRepository,
+        IVehicleFactory vehicleFactory)
     {
-        _carStateMachine = carStateMachine;
-        _createManagerFactory = createManagerFactory;
         _vehicleStateRepository = vehicleStateRepository;
+        _vehicleFactory = vehicleFactory;
     }
 
     public void Start(VehicleType type, string vehicleName)
     {
-        var vehicleStateManager = _createManagerFactory.GetCarStateManager(type);
+        var vehicleEntity = _vehicleStateRepository.GetByName(vehicleName);
 
-        var carEntity = _vehicleStateRepository.GetByName(vehicleName);
+        if (vehicleEntity == null)
+        {
+            Console.WriteLine("No vehicle found.... :(");
+            return;
+        }
 
-        Debug.Assert(carEntity != null, nameof(carEntity) + " != null");
+        var stateMachine = _vehicleFactory.CreateVehicleStateMachine(type, vehicleEntity, _vehicleStateRepository); 
+
+        Debug.Assert(vehicleEntity != null, nameof(vehicleEntity) + " != null");
 
         string? rawInput;
         do
         {
-            Console.WriteLine($"Current car state : {_carStateMachine.CurrentState} " +
-                              $"\tChoices : {JsonSerializer.Serialize(_carStateMachine.PermittedTriggers)}");
+            Console.Write($"Current car {stateMachine.Name} at state : {stateMachine.CurrentState} \n" +
+                              $"\tChoices : {JsonSerializer.Serialize(stateMachine.PermittedTriggers.Select(x => x.ToString()))} or 'q' to quit : ");
 
             rawInput = Console.ReadLine();
+            if (rawInput == "q") break;
 
             try
             {
                 var actionInput = VehicleStateManagerHelper.ValidateUserInput(rawInput);
-                vehicleStateManager.ProcessInputTrigger(actionInput, _carStateMachine);
+                stateMachine.TakeActionBase(actionInput);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                Console.WriteLine(e.Message);
             }
         } while (rawInput != "q");
 
-        Console.WriteLine("Bye bye");
+        Console.WriteLine("Game ended");
     }
 }

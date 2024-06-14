@@ -1,9 +1,10 @@
 ﻿using System.Text.Json;
-using CarStateMachine;
-using CarStateMachine.CarStateManagerFactory;
-using CarStateMachine.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StateMachine;
+using StateMachine.Persistence;
+using StateMachine.VehicleStateMachineFactory;
+using StateMachine.VehicleStateMachines;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -11,9 +12,9 @@ builder.Services.AddDbContext<CarStateDbContext>();
 
 builder.Services.AddScoped<IVehicleStateRepository, VehicleStateRepository>();
 
-builder.Services.AddScoped<IVehicleStateMachineBase, CarStateMachine.CarStateMachine>();
+builder.Services.AddScoped<IVehicleStateMachineBase, CarStateMachine>();
 
-builder.Services.AddScoped<IVehicleStateManagerFactory, VehicleStateManagerFactory>();
+builder.Services.AddScoped<IVehicleFactory, VehicleFactory>();
 
 builder.Services.AddSingleton<Game>();
 
@@ -28,10 +29,21 @@ if (dbContext != null)
 
 var game = app.Services.GetService<Game>();
 
-var availableCarTypes = JsonSerializer.Serialize(Enum.GetNames<VehicleType>());
+var availableVehicleTypes = JsonSerializer.Serialize(Enum.GetNames<VehicleType>());
 
-Console.Write($"Choose a car type : {availableCarTypes} : ");
+bool wannaStartGame;
+do
+{
+    Console.Write($"Choose a vehicle type : {availableVehicleTypes} : ");
+    var success = Enum.TryParse<VehicleType>(Console.ReadLine(), out var type);
 
-var success = Enum.TryParse<VehicleType>(Console.ReadLine(), out var type);
+    Console.Write("Choose a vehicle name : ");
+    var vehicleName = Console.ReadLine();
 
-game!.Start(success ? type : VehicleType.Basic);
+    game!.Start(success ? type : VehicleType.Car, string.IsNullOrEmpty(vehicleName) ? "Name1" : vehicleName);
+
+    Console.Write("Type 'yes' to start a new state machine game : ");
+    wannaStartGame = Console.ReadLine() == "yes";
+} while (wannaStartGame);
+
+Console.WriteLine("Bye bye");

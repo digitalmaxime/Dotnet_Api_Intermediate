@@ -1,7 +1,7 @@
-using CarStateMachine.Persistence;
 using Stateless;
+using StateMachine.Persistence;
 
-namespace CarStateMachine;
+namespace StateMachine;
 
 public enum State
 {
@@ -23,14 +23,13 @@ public enum Action
 
 public interface IVehicleStateMachineBase
 {
-    public int CurrentSpeed { get; set; }
     public string Name { get; set; }
 
     public State CurrentState { get; }
 
     public IEnumerable<Action> PermittedTriggers { get; }
 
-    public void TakeAction(Action action);
+    public void TakeActionBase(Action action);
 }
 
 public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
@@ -54,14 +53,6 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
                 StateMachine.Fire(Action.Start);
                 return;
 
-            case Action.Accelerate:
-                StateMachine.Accelerate(Min(speed ?? -1, 100));
-                return;
-
-            case Action.Decelerate:
-                StateMachine.Decelerate(Max(speed ?? -1, 0));
-                return;
-
             default:
                 TakeAction(action);
                 return;
@@ -69,14 +60,14 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
     }
 
     protected readonly StateMachine<State, Action> StateMachine;
-    protected readonly IVehicleStateRepository VehicleStateRepository;
+    private readonly IVehicleStateRepository _vehicleStateRepository;
 
     protected StateMachine<State, Action>.TriggerWithParameters<int>? AccelerateWithParam;
     protected StateMachine<State, Action>.TriggerWithParameters<int>? DecelerateWithParam;
 
     protected VehicleStateMachineBase(IVehicleStateRepository vehicleStateRepository)
     {
-        VehicleStateRepository = vehicleStateRepository;
+        _vehicleStateRepository = vehicleStateRepository;
 
         StateMachine = new StateMachine<State, Action>(
             () =>
@@ -93,10 +84,10 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
 
     protected void SaveState()
     {
-        VehicleStateRepository?.Save(Name, CurrentState, CurrentSpeed);
+        _vehicleStateRepository?.Save(Name, CurrentState, CurrentSpeed);
     }
 
-    public static void PrintState(StateMachine<State, Action>.Transition state)
+    private static void PrintState(StateMachine<State, Action>.Transition state)
     {
         Console.WriteLine(
             $"\tOnEntry/OnExit\n\tState Source : {state.Source}, " +
@@ -104,7 +95,7 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
             $"State destination : {state.Destination}");
     }
 
-    protected void ConfigureVehicleStates()
+    private void ConfigureVehicleStates()
     {
         StateMachine.Configure(State.Stopped)
             .Permit(Action.Start, State.Started)
