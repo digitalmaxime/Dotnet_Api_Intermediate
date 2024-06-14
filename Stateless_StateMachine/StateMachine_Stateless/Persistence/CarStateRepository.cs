@@ -1,26 +1,27 @@
+using Stateless.Graph;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.Persistence;
 
-public interface IVehicleStateRepository
+public interface ICarStateRepository
 {
-    void Save(string name, State state, int speed);
+    void Save(string name, CarStateMachine.CarState state, int speed);
 
-    VehicleEntity? GetByName(string name);
+    CarEntity? GetById(string id);
 }
 
-public class VehicleStateRepository : IVehicleStateRepository
+public class CarStateRepository : ICarStateRepository
 {
     private readonly CarStateDbContext _dbContext;
 
-    public VehicleStateRepository(CarStateDbContext dbContext)
+    public CarStateRepository(CarStateDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public void Save(string name, State state, int speed)
+    public void Save(string name, CarStateMachine.CarState state, int speed)
     {
-        var carEntity = _dbContext.CarEntity.FirstOrDefault(c => c.Name == name);
+        var carEntity = _dbContext.CarEntity.FirstOrDefault(c => c.Id == name);
         
         if (carEntity == null) return;
         
@@ -30,8 +31,8 @@ public class VehicleStateRepository : IVehicleStateRepository
         _dbContext.SaveChanges();
     }
 
-    public VehicleEntity? GetByName(string name)
+    public CarEntity? GetById(string id)
     {
-        return _dbContext.CarEntity.FirstOrDefault(c => c.Name == name);
+        return _dbContext.CarEntity.FirstOrDefault(c => c.Id == id);
     }
 }

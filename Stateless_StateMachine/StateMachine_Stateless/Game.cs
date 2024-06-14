@@ -8,35 +8,33 @@ namespace StateMachine;
 
 public class Game
 {
-    private readonly IVehicleStateRepository _vehicleStateRepository;
+    // private readonly ICarStateRepository _carStateRepository;
     private readonly IVehicleFactory _vehicleFactory;
 
-    public Game( 
-        IVehicleStateRepository vehicleStateRepository,
-        IVehicleFactory vehicleFactory)
+    public Game(ICarStateRepository carStateRepository, IVehicleFactory vehicleFactory)
     {
-        _vehicleStateRepository = vehicleStateRepository;
+        // _carStateRepository = carStateRepository;
         _vehicleFactory = vehicleFactory;
     }
 
-    public void Start(VehicleType type, string vehicleName)
+    public void Start(VehicleType type, string vehicleId)
     {
-        var vehicleEntity = _vehicleStateRepository.GetByName(vehicleName);
+        // var vehicleEntity = _carStateRepository.GetById(vehicleId);
 
-        if (vehicleEntity == null)
-        {
-            Console.WriteLine("No vehicle found.... :(");
-            return;
-        }
+        // if (vehicleEntity == null)
+        // {
+        //     Console.WriteLine("No vehicle found.... :(");
+        //     return;
+        // }
 
-        var stateMachine = _vehicleFactory.CreateVehicleStateMachine(type, vehicleEntity, _vehicleStateRepository); 
+        var stateMachine = _vehicleFactory.CreateVehicleStateMachine(type, vehicleId); 
 
         Debug.Assert(vehicleEntity != null, nameof(vehicleEntity) + " != null");
 
         string? rawInput;
         do
         {
-            Console.Write($"Current car {stateMachine.Name} at state : {stateMachine.CurrentState} \n" +
+            Console.Write($"Current car {stateMachine.Id} at state : {stateMachine.CurrentState} \n" +
                               $"\tChoices : {JsonSerializer.Serialize(stateMachine.PermittedTriggers.Select(x => x.ToString()))} or 'q' to quit : ");
 
             rawInput = Console.ReadLine();
@@ -45,7 +43,7 @@ public class Game
             try
             {
                 var actionInput = VehicleStateManagerHelper.ValidateUserInput(rawInput);
-                stateMachine.TakeActionBase(actionInput);
+                stateMachine.TakeAction(actionInput);
             }
             catch (Exception e)
             {

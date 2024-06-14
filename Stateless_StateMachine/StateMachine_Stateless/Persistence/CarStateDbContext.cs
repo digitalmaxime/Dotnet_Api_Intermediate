@@ -14,24 +14,24 @@ public class CarStateDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<VehicleEntity>()
-            .HasKey(x => x.Name);
+            .HasKey(x => x.Id);
 
         modelBuilder.Entity<VehicleEntity>()
             .HasData(new VehicleEntity()
                 {
-                    Name = "Name1",
+                    Id = "Name1",
                     Speed = 0,
-                    State = State.Stopped
+                    State = CarStateMachine.CarState.Stopped
                 },
                 new VehicleEntity()
                 {
-                    Name = "Name2",
+                    Id = "Name2",
                     Speed = 0,
-                    State = State.Stopped
+                    State = CarStateMachine.CarState.Stopped
                 });
 
         base.OnModelCreating(modelBuilder);
     }
 
-    public DbSet<VehicleEntity> CarEntity { get; set; }
+    public DbSet<CarEntity> CarEntity { get; set; }
 }

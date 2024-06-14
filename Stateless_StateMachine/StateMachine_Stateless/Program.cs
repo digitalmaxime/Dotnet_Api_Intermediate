@@ -10,11 +10,12 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<CarStateDbContext>();
 
-builder.Services.AddScoped<IVehicleStateRepository, VehicleStateRepository>();
+builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
 
-builder.Services.AddScoped<IVehicleStateMachineBase, CarStateMachine>();
+builder.Services.AddKeyedScoped<IVehicleStateMachine, CarStateMachine>("car");
+builder.Services.AddKeyedScoped<IVehicleStateMachine, PlaneStateMachine>("plane");
 
-builder.Services.AddScoped<IVehicleFactory, VehicleFactory>();
+builder.Services.AddSingleton<IVehicleFactory, VehicleFactory>();
 
 builder.Services.AddSingleton<Game>();
 
@@ -37,10 +38,10 @@ do
     Console.Write($"Choose a vehicle type : {availableVehicleTypes} : ");
     var success = Enum.TryParse<VehicleType>(Console.ReadLine(), out var type);
 
-    Console.Write("Choose a vehicle name : ");
-    var vehicleName = Console.ReadLine();
+    Console.Write("Choose a vehicle id : ");
+    var vehicleId = Console.ReadLine();
 
-    game!.Start(success ? type : VehicleType.Car, string.IsNullOrEmpty(vehicleName) ? "Name1" : vehicleName);
+    game!.Start(success ? type : VehicleType.Car, string.IsNullOrEmpty(vehicleId) ? "Id1" : vehicleId);
 
     Console.Write("Type 'yes' to start a new state machine game : ");
     wannaStartGame = Console.ReadLine() == "yes";

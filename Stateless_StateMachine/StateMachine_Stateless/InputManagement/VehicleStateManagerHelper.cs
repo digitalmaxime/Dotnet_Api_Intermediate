@@ -1,3 +1,5 @@
+using Action = StateMachine.VehicleStateMachines.Action;
+
 namespace StateMachine.InputManagement;
 
 public static class VehicleStateManagerHelper

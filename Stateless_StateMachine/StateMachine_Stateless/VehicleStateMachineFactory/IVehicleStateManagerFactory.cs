@@ -10,5 +10,5 @@ public enum VehicleType
 }
 public interface IVehicleFactory
 {
-    IVehicleStateMachineBase CreateVehicleStateMachine(VehicleType type, VehicleEntity vehicleEntity, IVehicleStateRepository vehicleStateRepository);
+    IVehicleStateMachine CreateVehicleStateMachine(VehicleType type, string vehicleId);
 }

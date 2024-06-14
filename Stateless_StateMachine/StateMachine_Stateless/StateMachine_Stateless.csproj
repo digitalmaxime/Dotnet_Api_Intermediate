@@ -15,4 +15,8 @@
       <PackageReference Include="Stateless" Version="5.16.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Doc\" />
+    </ItemGroup>
+
 </Project>

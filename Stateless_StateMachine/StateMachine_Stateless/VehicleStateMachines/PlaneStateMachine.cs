@@ -3,64 +3,93 @@ using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
 
-public class PlaneStateMachine : VehicleStateMachineBase
+public class PlaneStateMachine : IVehicleStateMachine
 {
-    public sealed override string Name { get; set; }
-    public sealed override State CurrentState { get; set; }
-    public override void TakeAction(Action action)
+    public enum PlaneState
     {
-        switch (action)
-        {
-            case Action.Accelerate:
-                StateMachine.Fire(AccelerateWithParam, CurrentSpeed + 35);
-                return;
-
-            case Action.Decelerate:
-                StateMachine.Fire(DecelerateWithParam, Max(CurrentSpeed - 35, 0));
-                return;
-            
-            case Action.Fly:
-                StateMachine.Fire(Action.Fly);
-                return;
-
-            case Action.Land:
-                StateMachine.Fire(Action.Land);
-                return;
-            
-            default:
-                throw new ArgumentOutOfRangeException(nameof(action), action, $"{nameof(PlaneStateMachine)} does not support {action}");
-        }
+        Stopped,
+        Started,
+        Running,
+        Drifting,
+        Flying,
     }
 
-    public sealed override int CurrentSpeed { get; set; }
-
-    public PlaneStateMachine(VehicleEntity vehicleEntity, IVehicleStateRepository vehicleStateRepository)
-        : base(vehicleStateRepository)
+    public enum PlaneAction
     {
-        Name = vehicleEntity.Name;
-        CurrentState = vehicleEntity.State;
-        CurrentSpeed = vehicleEntity.Speed;
+        Stop,
+        Start,
+        Accelerate,
+        Decelerate,
+        Drift,
+        Fly,
+        Land
     }
+    public int Altitude { get; set; }
 
+    public PlaneStateMachine(string id, IPlaneStateRepository carStateRepository)
+    {
+        Id = id;
+        _planeStateRepository = carStateRepository;
+        InitializeStateMachine(id);
+        ConfigureStates();
+    }
     ~PlaneStateMachine()
     {
         Console.WriteLine("~PlaneStateMachine xox");
     }
-
-    protected override void ConfigureStates()
+    
+    private void InitializeStateMachine(string id)
     {
-        AccelerateWithParam = StateMachine.SetTriggerParameters<int>(Action.Accelerate);
-        DecelerateWithParam = StateMachine.SetTriggerParameters<int>(Action.Decelerate);
+        var car = _planeStateRepository.GetById(id);
+        if (car == null)
+        {
+            // TODO: Create
+        }
 
-        StateMachine.Configure(State.Running)
+        CurrentPlaneState = car?.State ?? PlaneState.Stopped;
+        CurrentSpeed = car?.Speed ?? -1;
+
+        _stateMachine = new StateMachine<PlaneState, PlaneAction>(
+            () => CurrentCarState,
+            (s) =>
+            {
+                CurrentCarState = s;
+                SaveState();
+            }
+        );
+    }
+    protected void ConfigureStates()
+    {
+        AccelerateWithParam = StateMachine.SetTriggerParameters<int>(PlaneAction.Accelerate);
+        DecelerateWithParam = StateMachine.SetTriggerParameters<int>(PlaneAction.Decelerate);
+        
+        StateMachine.Configure(PlaneState.Stopped)
+            .Permit(PlaneAction.Start, PlaneState.Started)
+            .OnEntry((state) =>
+            {
+                CurrentSpeed = 0;
+                PrintState(state);
+            })
+            .OnExit(PrintState);
+
+        StateMachine.Configure(PlaneState.Started)
+            .Permit(PlaneAction.Accelerate, PlaneState.Running)
+            .Permit(PlaneAction.Stop, PlaneState.Stopped)
+            .OnEntry((state) =>
+            {
+                CurrentSpeed = 0;
+                PrintState(state);
+            })
+            .OnExit(PrintState);
+        StateMachine.Configure(PlaneState.Running)
             .OnEntryFrom(AccelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
                 SaveState();
                 Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             })
-            .PermitIf(Action.Stop, State.Stopped, () => CurrentSpeed == 0)
-            .PermitIf(Action.Fly, State.Flying, () => CurrentSpeed > 100)
+            .PermitIf(PlaneAction.Stop, PlaneState.Stopped, () => CurrentSpeed == 0)
+            .PermitIf(PlaneAction.Fly, PlaneState.Flying, () => CurrentSpeed > 100)
             .InternalTransition<int>(AccelerateWithParam, (speed, _) =>
             {
                 CurrentSpeed = speed;
@@ -73,7 +102,41 @@ public class PlaneStateMachine : VehicleStateMachineBase
                 Console.WriteLine($"\tSpeed is {CurrentSpeed}");
             });
 
-        StateMachine.Configure(State.Flying)
-            .Permit(Action.Land, State.Running);
+        StateMachine.Configure(PlaneState.Flying)
+            .Permit(PlaneAction.Land, PlaneState.Running);
+    }
+
+    public void TakeAction(PlaneAction action)
+    {
+        switch (action)
+        {
+            case PlaneAction.Stop:
+                StateMachine.Fire(PlaneAction.Stop);
+                return;
+
+            case PlaneAction.Start:
+                StateMachine.Fire(PlaneAction.Start);
+                return;
+
+            case PlaneAction.Accelerate:
+                StateMachine.Fire(AccelerateWithParam, CurrentSpeed + 35);
+                return;
+
+            case PlaneAction.Decelerate:
+                StateMachine.Fire(DecelerateWithParam, Max(CurrentSpeed - 35, 0));
+                return;
+
+            case PlaneAction.Fly:
+                StateMachine.Fire(PlaneAction.Fly);
+                return;
+
+            case PlaneAction.Land:
+                StateMachine.Fire(PlaneAction.Land);
+                return;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action,
+                    $"{nameof(PlaneStateMachine)} does not support {action}");
+        }
     }
 }
