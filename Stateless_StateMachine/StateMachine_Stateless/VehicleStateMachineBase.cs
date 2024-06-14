@@ -1,4 +1,3 @@
-using static System.Int32;
 using CarStateMachine.Persistence;
 using Stateless;
 
@@ -27,7 +26,11 @@ public interface IVehicleStateMachineBase
     public int CurrentSpeed { get; set; }
     public string Name { get; set; }
 
-    public State CurrentState { get; set; }
+    public State CurrentState { get; }
+
+    public IEnumerable<Action> PermittedTriggers { get; }
+
+    public void TakeAction(Action action);
 }
 
 public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
@@ -35,21 +38,47 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
     public abstract string Name { get; set; }
     public abstract int CurrentSpeed { get; set; }
     public abstract State CurrentState { get; set; }
+    public IEnumerable<Action> PermittedTriggers => StateMachine.GetPermittedTriggers();
 
-    protected readonly StateMachine<State, Action> CarState;
-    
+    public abstract void TakeAction(Action action);
+
+    public void TakeActionBase(Action action)
+    {
+        switch (action)
+        {
+            case Action.Stop:
+                StateMachine.Fire(Action.Stop);
+                return;
+
+            case Action.Start:
+                StateMachine.Fire(Action.Start);
+                return;
+
+            case Action.Accelerate:
+                StateMachine.Accelerate(Min(speed ?? -1, 100));
+                return;
+
+            case Action.Decelerate:
+                StateMachine.Decelerate(Max(speed ?? -1, 0));
+                return;
+
+            default:
+                TakeAction(action);
+                return;
+        }
+    }
+
+    protected readonly StateMachine<State, Action> StateMachine;
     protected readonly IVehicleStateRepository VehicleStateRepository;
-    
-    public IEnumerable<string> PermittedTriggers => CarState.GetPermittedTriggers().Select(x => x.ToString());
-    
-    protected StateMachine<State, Action>.TriggerWithParameters<int>? _accelerateWithParam;
-    protected StateMachine<State, Action>.TriggerWithParameters<int>? _decelerateWithParam;
+
+    protected StateMachine<State, Action>.TriggerWithParameters<int>? AccelerateWithParam;
+    protected StateMachine<State, Action>.TriggerWithParameters<int>? DecelerateWithParam;
 
     protected VehicleStateMachineBase(IVehicleStateRepository vehicleStateRepository)
     {
         VehicleStateRepository = vehicleStateRepository;
 
-        CarState = new StateMachine<State, Action>(
+        StateMachine = new StateMachine<State, Action>(
             () =>
                 CurrentState,
             (s) =>
@@ -59,7 +88,7 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
             }
         );
 
-        ConfigureCarStates();
+        ConfigureVehicleStates();
     }
 
     protected void SaveState()
@@ -75,26 +104,29 @@ public abstract class VehicleStateMachineBase : IVehicleStateMachineBase
             $"State destination : {state.Destination}");
     }
 
-    protected abstract void ConfigureCarStates();
-    
-    public void Stop()
+    protected void ConfigureVehicleStates()
     {
-        CarState.Fire(Action.Stop);
+        StateMachine.Configure(State.Stopped)
+            .Permit(Action.Start, State.Started)
+            .OnEntry((state) =>
+            {
+                CurrentSpeed = 0;
+                PrintState(state);
+            })
+            .OnExit(PrintState);
+
+        StateMachine.Configure(State.Started)
+            .Permit(Action.Accelerate, State.Running)
+            .Permit(Action.Stop, State.Stopped)
+            .OnEntry((state) =>
+            {
+                CurrentSpeed = 0;
+                PrintState(state);
+            })
+            .OnExit(PrintState);
+
+        ConfigureStates();
     }
 
-    public void Start()
-    {
-        CarState.Fire(Action.Start);
-    }
-
-    public void Accelerate(int speed)
-    {
-        CarState.Fire(_accelerateWithParam, speed);
-    }
-
-    public void Decelerate(int speed)
-    {
-        CarState.Fire(_decelerateWithParam, Max(speed, 0));
-    }
-
+    protected abstract void ConfigureStates();
 }

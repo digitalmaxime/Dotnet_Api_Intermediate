@@ -2,13 +2,13 @@ using CarStateMachine.CarStateManager;
 
 namespace CarStateMachine.CarStateManagerFactory;
 
-public class CarStateManagerFactory: ICarStateManagerFactory
+public class VehicleStateManagerFactory: IVehicleStateManagerFactory
 {
-    public CarStateManager.CarStateManagerBase GetCarStateManager(CarType type)
+    public IVehicleStateManager GetCarStateManager(VehicleType type)
     {
         return type switch
         {
-            CarType.Basic => new BasicCarStateManager(),
+            VehicleType.Basic => new CarStateManager.CarStateManager(),
             // CarType.Flying => new FlyingCarStateManager(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };

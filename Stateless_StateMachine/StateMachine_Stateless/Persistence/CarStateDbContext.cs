@@ -20,7 +20,7 @@ public class CarStateDbContext : DbContext
             {
                 Name = "Name1",
                 Speed = 0,
-                State = CarStateMachine.State.Stopped
+                State = State.Stopped
             });
 
         base.OnModelCreating(modelBuilder);

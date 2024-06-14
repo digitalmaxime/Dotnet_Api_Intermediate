@@ -11,9 +11,9 @@ builder.Services.AddDbContext<CarStateDbContext>();
 
 builder.Services.AddScoped<IVehicleStateRepository, VehicleStateRepository>();
 
-builder.Services.AddScoped<ICarStateMachine, CarStateMachine.CarStateMachine>();
+builder.Services.AddScoped<IVehicleStateMachineBase, CarStateMachine.CarStateMachine>();
 
-builder.Services.AddScoped<ICarStateManagerFactory, CarStateManagerFactory>();
+builder.Services.AddScoped<IVehicleStateManagerFactory, VehicleStateManagerFactory>();
 
 builder.Services.AddSingleton<Game>();
 
@@ -28,10 +28,10 @@ if (dbContext != null)
 
 var game = app.Services.GetService<Game>();
 
-var availableCarTypes = JsonSerializer.Serialize(Enum.GetNames<CarType>());
+var availableCarTypes = JsonSerializer.Serialize(Enum.GetNames<VehicleType>());
 
 Console.Write($"Choose a car type : {availableCarTypes} : ");
 
-var success = Enum.TryParse<CarType>(Console.ReadLine(), out var type);
+var success = Enum.TryParse<VehicleType>(Console.ReadLine(), out var type);
 
-game!.Start(success ? type : CarType.Basic);
+game!.Start(success ? type : VehicleType.Basic);
