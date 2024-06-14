@@ -7,32 +7,32 @@ namespace CarStateMachine;
 
 public class Game
 {
+    private readonly ICarStateMachine _carStateMachine;
     private readonly ICarStateManagerFactory _createManagerFactory;
-    private readonly ICarStateRepository _carStateRepository;
+    private readonly IVehicleStateRepository _vehicleStateRepository;
 
-    public Game(ICarStateManagerFactory createManagerFactory, ICarStateRepository carStateRepository)
+    public Game(ICarStateMachine carStateMachine, ICarStateManagerFactory createManagerFactory, IVehicleStateRepository vehicleStateRepository)
     {
+        _carStateMachine = carStateMachine;
         _createManagerFactory = createManagerFactory;
-        _carStateRepository = carStateRepository;
+        _vehicleStateRepository = vehicleStateRepository;
     }
 
     public void Start(CarType type)
     {
         var carStateManager = _createManagerFactory.GetCarStateManager(type);
 
-        var carEntity = _carStateRepository.GetByName("Name1");
+        var carEntity = _vehicleStateRepository.GetByName("Name1");
 
         Debug.Assert(carEntity != null, nameof(carEntity) + " != null");
-        
-        var car = new Car(carEntity.Name, carEntity.State, carEntity.Speed, _carStateRepository);
-        
+                
         string? input;
         do
         {
-            Console.WriteLine($"Current car state : {car.CurrentState} " +
-                              $"\tChoices : {JsonSerializer.Serialize(car.PermittedTriggers)}");
+            Console.WriteLine($"Current car state : {_carStateMachine.CurrentState} " +
+                              $"\tChoices : {JsonSerializer.Serialize(_carStateMachine.PermittedTriggers)}");
             input = Console.ReadLine();
-            carStateManager.ProcessUserInput(input, car);
+            carStateManager.ProcessUserInput(input, _carStateMachine);
         } while (input != "q");
 
         Console.WriteLine("Bye bye");

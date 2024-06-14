@@ -9,7 +9,9 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<CarStateDbContext>();
 
-builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
+builder.Services.AddScoped<IVehicleStateRepository, VehicleStateRepository>();
+
+builder.Services.AddScoped<ICarStateMachine, CarStateMachine.CarStateMachine>();
 
 builder.Services.AddScoped<ICarStateManagerFactory, CarStateManagerFactory>();
 

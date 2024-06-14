@@ -1,39 +1,39 @@
-using static System.Int32;
-
-namespace CarStateMachine.CarStateManager;
-
-public class FlyingCarStateManager: CarStateManagerBase
-{
-    protected override void ProcessInputTrigger(Car.Action action, int speed, Car car)
-    {
-        switch (action)
-        {
-            case Car.Action.Stop:
-                car.Stop();
-                break;
-
-            case Car.Action.Start:
-                car.Start();
-                break;
-
-            case Car.Action.Accelerate:
-                car.Accelerate(speed);
-                break;
-
-            case Car.Action.Decelerate:
-                car.Decelerate(Max(speed, 0));
-                break;
-
-            case Car.Action.Fly:
-                car.Fly();
-                break;
-
-            case Car.Action.Land:
-                car.Land();
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-    }
-}
+// using static System.Int32;
+//
+// namespace CarStateMachine.CarStateManager;
+//
+// public class FlyingCarStateManager: CarStateManagerBase
+// {
+//     protected override void ProcessInputTrigger(CarStateMachine.Action action, int speed, CarStateMachine carStateMachine)
+//     {
+//         switch (action)
+//         {
+//             case CarStateMachine.Action.Stop:
+//                 carStateMachine.Stop();
+//                 break;
+//
+//             case CarStateMachine.Action.Start:
+//                 carStateMachine.Start();
+//                 break;
+//
+//             case CarStateMachine.Action.Accelerate:
+//                 carStateMachine.Accelerate(speed);
+//                 break;
+//
+//             case CarStateMachine.Action.Decelerate:
+//                 carStateMachine.Decelerate(Max(speed, 0));
+//                 break;
+//
+//             case CarStateMachine.Action.Fly:
+//                 carStateMachine.Fly();
+//                 break;
+//
+//             case CarStateMachine.Action.Land:
+//                 carStateMachine.Land();
+//                 break;
+//
+//             default:
+//                 throw new ArgumentOutOfRangeException();
+//         }
+//     }
+// }

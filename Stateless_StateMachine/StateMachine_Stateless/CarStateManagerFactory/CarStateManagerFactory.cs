@@ -9,7 +9,7 @@ public class CarStateManagerFactory: ICarStateManagerFactory
         return type switch
         {
             CarType.Basic => new BasicCarStateManager(),
-            CarType.Flying => new FlyingCarStateManager(),
+            // CarType.Flying => new FlyingCarStateManager(),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

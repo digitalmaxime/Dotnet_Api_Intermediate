@@ -4,9 +4,9 @@ namespace CarStateMachine.CarStateManager;
 
 public abstract class CarStateManagerBase
 {
-    public void ProcessUserInput(string? input, Car car)
+    public void ProcessUserInput(string? input, VehicleStateMachineBase carStateMachine)
     {
-        var success = Enum.TryParse<Car.Action>(input, out var action);
+        var success = Enum.TryParse<VehicleStateMachineBase.Action>(input, out var action);
 
         if (!success && input != "q")
         {
@@ -17,9 +17,9 @@ public abstract class CarStateManagerBase
         var speed = 1;
         if (input == "Accelerate")
         {
-            Console.Write($"Enter speed greater than current speed {car.CurrentSpeed} : ");
+            Console.Write($"Enter speed greater than current speed {carStateMachine.CurrentSpeed} : ");
             var parseSuccessful = TryParse(Console.ReadLine(), out var inputtedSpeed);
-            if (!parseSuccessful || inputtedSpeed < car.CurrentSpeed)
+            if (!parseSuccessful || inputtedSpeed < carStateMachine.CurrentSpeed)
             {
                 Console.WriteLine("\tInvalid argument for Speed");
                 return;
@@ -30,9 +30,9 @@ public abstract class CarStateManagerBase
 
         if (input == "Decelerate")
         {
-            Console.Write($"Enter speed < {car.CurrentSpeed} : ");
+            Console.Write($"Enter speed < {carStateMachine.CurrentSpeed} : ");
             var parseSuccessful = TryParse(Console.ReadLine(), out var inputedSpeed);
-            if (!parseSuccessful || inputedSpeed > car.CurrentSpeed)
+            if (!parseSuccessful || inputedSpeed > carStateMachine.CurrentSpeed)
             {
                 Console.WriteLine("\tInvalid argument for Speed");
                 return;
@@ -41,8 +41,8 @@ public abstract class CarStateManagerBase
             speed = inputedSpeed;
         }
 
-        ProcessInputTrigger(action, speed, car);
+        ProcessInputTrigger(action, speed, carStateMachine);
     }
 
-    protected abstract void ProcessInputTrigger(Car.Action action, int speed, Car car);
+    protected abstract void ProcessInputTrigger(VehicleStateMachineBase.Action action, int speed, VehicleStateMachineBase carStateMachine);
 }
