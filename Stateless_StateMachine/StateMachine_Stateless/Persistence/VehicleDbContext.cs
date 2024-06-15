@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StateMachine.Persistence.Domain;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.Persistence;

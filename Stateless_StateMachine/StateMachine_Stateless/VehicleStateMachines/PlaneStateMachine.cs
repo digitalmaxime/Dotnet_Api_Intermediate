@@ -1,12 +1,14 @@
 using Stateless;
 using StateMachine.Persistence;
+using StateMachine.Persistence.Domain;
+using StateMachine.Persistence.Repositories;
 using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
 
 public class PlaneStateMachine : IVehicleStateMachine
 {
-    private readonly IPlaneStateRepository _planeStateRepository;
+    private readonly IEntityWithIdRepository<PlaneEntity> _planeStateRepository;
 
     public enum PlaneState
     {
@@ -38,7 +40,7 @@ public class PlaneStateMachine : IVehicleStateMachine
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
-    public PlaneStateMachine(string id, IPlaneStateRepository planeStateRepository)
+    public PlaneStateMachine(string id, IEntityWithIdRepository<PlaneEntity> planeStateRepository)
     {
         _planeStateRepository = planeStateRepository;
         Id = id;
@@ -56,7 +58,12 @@ public class PlaneStateMachine : IVehicleStateMachine
         var plane = _planeStateRepository.GetById(id);
         if (plane == null)
         {
-            _planeStateRepository.Save(id, PlaneState.Stopped, speed: 0);
+            var newPlane = new PlaneEntity()
+            {
+                Id = id, Speed = 0, State = PlaneState.Stopped
+            };
+            
+            _planeStateRepository.Save(newPlane);
         }
 
         CurrentPlaneState = plane?.State ?? PlaneState.Stopped;
@@ -122,7 +129,11 @@ public class PlaneStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
-        _planeStateRepository?.Save(Id, CurrentPlaneState, CurrentSpeed);
+        var plane = new PlaneEntity()
+        {
+            Id = Id, Speed = CurrentSpeed, State = CurrentPlaneState
+        };
+        _planeStateRepository?.Save(plane);
     }
 
     public void TakeAction(string actionStr)

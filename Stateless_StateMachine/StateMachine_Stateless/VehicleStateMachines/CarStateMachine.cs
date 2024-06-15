@@ -1,6 +1,7 @@
 using Stateless;
 using Stateless.Graph;
-using StateMachine.Persistence;
+using StateMachine.Persistence.Domain;
+using StateMachine.Persistence.Repositories;
 using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
@@ -31,13 +32,13 @@ public class CarStateMachine : IVehicleStateMachine
     public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
 
     private StateMachine<CarState, CarAction> _stateMachine;
-    private readonly ICarStateRepository _carStateRepository;
+    private readonly IEntityWithIdRepository<CarEntity> _carStateRepository;
 
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
 
-    public CarStateMachine(string id, ICarStateRepository carStateRepository)
+    public CarStateMachine(string id, IEntityWithIdRepository<CarEntity> carStateRepository)
     {
         Id = id;
         _carStateRepository = carStateRepository;
@@ -50,7 +51,12 @@ public class CarStateMachine : IVehicleStateMachine
         var car = _carStateRepository.GetById(id);
         if (car == null)
         {
-            _carStateRepository.Save(id, CarState.Stopped, speed: 0);
+            var newCarEntity = new CarEntity()
+            {
+                Id = id, Speed = 0, State = CarState.Stopped
+            };
+            
+            _carStateRepository.Save(newCarEntity);
         }
 
         CurrentCarState = car?.State ?? CarState.Stopped;
@@ -117,7 +123,12 @@ public class CarStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
-        _carStateRepository?.Save(Id, CurrentCarState, CurrentSpeed);
+        var carEntity = new CarEntity()
+        {
+            Id = Id, Speed = CurrentSpeed, State = CurrentCarState
+        };
+        
+        _carStateRepository?.Save(carEntity);
     }
 
     public void TakeAction(string carActionStr)

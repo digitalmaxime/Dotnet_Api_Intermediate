@@ -1,8 +1,8 @@
 using StateMachine.VehicleStateMachines;
 
-namespace StateMachine.Persistence;
+namespace StateMachine.Persistence.Domain;
 
-public class CarEntity
+public class CarEntity: EntityWithId
 {
     public string Id { get; set; } = default!; // PK
     public int Speed { get; set; }

@@ -1,16 +1,18 @@
 using StateMachine.Persistence;
+using StateMachine.Persistence.Domain;
+using StateMachine.Persistence.Repositories;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.VehicleStateMachineFactory;
 
 public class VehicleFactory : IVehicleFactory
 {
-    private readonly ICarStateRepository _carStateRepository;
-    private readonly IPlaneStateRepository _planeStateRepository;
+    private readonly IEntityWithIdRepository<CarEntity> _carStateRepository;
+    private readonly IEntityWithIdRepository<PlaneEntity> _planeStateRepository;
     private readonly Dictionary<string, CarStateMachine> _carStateMachineDictionary = new();
     private readonly Dictionary<string, PlaneStateMachine> _planeStateMachineDictionary = new();
 
-    public VehicleFactory(ICarStateRepository carStateRepository, IPlaneStateRepository planeStateRepository)
+    public VehicleFactory(IEntityWithIdRepository<CarEntity> carStateRepository, IEntityWithIdRepository<PlaneEntity> planeStateRepository)
     {
         _carStateRepository = carStateRepository;
         _planeStateRepository = planeStateRepository;
