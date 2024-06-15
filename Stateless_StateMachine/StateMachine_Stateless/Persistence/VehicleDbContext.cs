@@ -7,7 +7,7 @@ public class VehicleDbContext : DbContext
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseInMemoryDatabase("CarState");
+        optionsBuilder.UseInMemoryDatabase("VehicleState");
         base.OnConfiguring(optionsBuilder);
     }
 

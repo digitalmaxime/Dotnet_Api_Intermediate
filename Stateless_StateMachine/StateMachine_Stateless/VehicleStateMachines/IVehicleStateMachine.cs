@@ -2,7 +2,7 @@ namespace StateMachine.VehicleStateMachines;
 
 public interface IVehicleStateMachine
 {
-    string Id { get; set; }
+    string Id { get; }
     IEnumerable<string> GetPermittedTriggers { get; }
     string GetCurrentState { get; }
     void TakeAction(string carAction);

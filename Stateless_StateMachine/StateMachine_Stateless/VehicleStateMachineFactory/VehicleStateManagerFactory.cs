@@ -7,8 +7,8 @@ public class VehicleFactory : IVehicleFactory
 {
     private readonly ICarStateRepository _carStateRepository;
     private readonly IPlaneStateRepository _planeStateRepository;
-    public Dictionary<string, CarStateMachine> CarStateMachineDictionary = new();
-    public Dictionary<string, PlaneStateMachine> PlaneStateMachineDictionary = new();
+    private readonly Dictionary<string, CarStateMachine> _carStateMachineDictionary = new();
+    private readonly Dictionary<string, PlaneStateMachine> _planeStateMachineDictionary = new();
 
     public VehicleFactory(ICarStateRepository carStateRepository, IPlaneStateRepository planeStateRepository)
     {
@@ -18,11 +18,11 @@ public class VehicleFactory : IVehicleFactory
 
     private CarStateMachine GetOrAddCarStateMachine(string id)
     {
-        var success = CarStateMachineDictionary.TryGetValue(id, out var stateMachine);
+        var success = _carStateMachineDictionary.TryGetValue(id, out var stateMachine);
         if (!success)
         {
             stateMachine = new CarStateMachine(id, _carStateRepository);
-            CarStateMachineDictionary.Add(id, stateMachine);
+            _carStateMachineDictionary.Add(id, stateMachine);
         }
 
         return stateMachine;
@@ -30,11 +30,11 @@ public class VehicleFactory : IVehicleFactory
 
     private PlaneStateMachine GetOrAddPlaneStateMachine(string id)
     {
-        var success = PlaneStateMachineDictionary.TryGetValue(id, out var stateMachine);
+        var success = _planeStateMachineDictionary.TryGetValue(id, out var stateMachine);
         if (!success)
         {
             stateMachine = new PlaneStateMachine(id, _planeStateRepository);
-            PlaneStateMachineDictionary.Add(id, stateMachine);
+            _planeStateMachineDictionary.Add(id, stateMachine);
         }
 
         return stateMachine;
