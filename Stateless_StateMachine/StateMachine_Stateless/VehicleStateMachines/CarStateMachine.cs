@@ -24,12 +24,13 @@ public class CarStateMachine : IVehicleStateMachine
         Drift
     }
 
-    private string Id { get; set; }
+    public string Id { get; set; }
     private int CurrentSpeed { get; set; }
     private CarState CurrentCarState { get; set; }
-    public IEnumerable<CarAction> PermittedTriggers => _stateMachine.GetPermittedTriggers();
-    private StateMachine<CarState, CarAction> _stateMachine;
+    public string GetCurrentState => CurrentCarState.ToString();
+    public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
 
+    private StateMachine<CarState, CarAction> _stateMachine;
     private readonly ICarStateRepository _carStateRepository;
 
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _accelerateWithParam;
@@ -49,7 +50,7 @@ public class CarStateMachine : IVehicleStateMachine
         var car = _carStateRepository.GetById(id);
         if (car == null)
         {
-            // TODO: Create
+            _carStateRepository.Save(id, CarState.Stopped, speed: 0);
         }
 
         CurrentCarState = car?.State ?? CarState.Stopped;
@@ -119,8 +120,10 @@ public class CarStateMachine : IVehicleStateMachine
         _carStateRepository?.Save(Id, CurrentCarState, CurrentSpeed);
     }
 
-    public void TakeAction(CarAction carAction)
+    public void TakeAction(string carActionStr)
     {
+        Enum.TryParse<CarAction>(carActionStr, out var carAction);
+
         switch (carAction)
         {
             case CarAction.Stop:

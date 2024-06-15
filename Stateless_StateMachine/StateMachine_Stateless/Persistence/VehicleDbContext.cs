@@ -3,7 +3,7 @@ using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.Persistence;
 
-public class CarStateDbContext : DbContext
+public class VehicleDbContext : DbContext
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -13,19 +13,22 @@ public class CarStateDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<VehicleEntity>()
+        modelBuilder.Entity<CarEntity>()
+            .HasKey(x => x.Id);
+        
+        modelBuilder.Entity<PlaneEntity>()
             .HasKey(x => x.Id);
 
-        modelBuilder.Entity<VehicleEntity>()
-            .HasData(new VehicleEntity()
+        modelBuilder.Entity<CarEntity>()
+            .HasData(new CarEntity()
                 {
-                    Id = "Name1",
+                    Id = "Id1",
                     Speed = 0,
                     State = CarStateMachine.CarState.Stopped
                 },
-                new VehicleEntity()
+                new CarEntity()
                 {
-                    Id = "Name2",
+                    Id = "Id2",
                     Speed = 0,
                     State = CarStateMachine.CarState.Stopped
                 });
@@ -34,4 +37,5 @@ public class CarStateDbContext : DbContext
     }
 
     public DbSet<CarEntity> CarEntity { get; set; }
+    public DbSet<PlaneEntity> PlaneEntity { get; set; }
 }

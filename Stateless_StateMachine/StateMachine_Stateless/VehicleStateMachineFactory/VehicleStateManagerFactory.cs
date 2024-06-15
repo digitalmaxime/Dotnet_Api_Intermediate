@@ -1,20 +1,19 @@
-using Stateless;
-using Stateless.Graph;
 using StateMachine.Persistence;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.VehicleStateMachineFactory;
 
-public class VehicleFactory: IVehicleFactory
+public class VehicleFactory : IVehicleFactory
 {
     private readonly ICarStateRepository _carStateRepository;
-    public Dictionary<string, CarStateMachine> CarStateMachineDictionary { get; }
-    public Dictionary<string, PlaneStateMachine> PlaneStateMachineDictionary { get; set; }
+    private readonly IPlaneStateRepository _planeStateRepository;
+    public Dictionary<string, CarStateMachine> CarStateMachineDictionary = new();
+    public Dictionary<string, PlaneStateMachine> PlaneStateMachineDictionary = new();
 
-    public VehicleFactory(ICarStateRepository carStateRepository, Dictionary<string, CarStateMachine> carStateMachineDictionary)
+    public VehicleFactory(ICarStateRepository carStateRepository, IPlaneStateRepository planeStateRepository)
     {
         _carStateRepository = carStateRepository;
-        CarStateMachineDictionary = carStateMachineDictionary;
+        _planeStateRepository = planeStateRepository;
     }
 
     private CarStateMachine GetOrAddCarStateMachine(string id)
@@ -28,13 +27,25 @@ public class VehicleFactory: IVehicleFactory
 
         return stateMachine;
     }
-    
+
+    private PlaneStateMachine GetOrAddPlaneStateMachine(string id)
+    {
+        var success = PlaneStateMachineDictionary.TryGetValue(id, out var stateMachine);
+        if (!success)
+        {
+            stateMachine = new PlaneStateMachine(id, _planeStateRepository);
+            PlaneStateMachineDictionary.Add(id, stateMachine);
+        }
+
+        return stateMachine;
+    }
+
     public IVehicleStateMachine CreateVehicleStateMachine(VehicleType type, string vehicleId)
     {
         return type switch
         {
             VehicleType.Car => GetOrAddCarStateMachine(vehicleId),
-            // VehicleType.Plane => new PlaneStateMachine(vehicleId),
+            VehicleType.Plane => GetOrAddPlaneStateMachine(vehicleId),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

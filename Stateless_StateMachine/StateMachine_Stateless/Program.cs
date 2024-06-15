@@ -8,9 +8,11 @@ using StateMachine.VehicleStateMachines;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddDbContext<CarStateDbContext>();
+builder.Services.AddDbContext<VehicleDbContext>();
 
 builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
+builder.Services.AddScoped<IPlaneStateRepository, PlaneStateRepository>();
+builder.Services.AddScoped<IVehicleFactory, VehicleFactory>();
 
 builder.Services.AddKeyedScoped<IVehicleStateMachine, CarStateMachine>("car");
 builder.Services.AddKeyedScoped<IVehicleStateMachine, PlaneStateMachine>("plane");
@@ -21,7 +23,7 @@ builder.Services.AddSingleton<Game>();
 
 var app = builder.Build();
 
-var dbContext = app.Services.GetService<CarStateDbContext>();
+var dbContext = app.Services.GetService<VehicleDbContext>();
 
 if (dbContext != null)
 {
