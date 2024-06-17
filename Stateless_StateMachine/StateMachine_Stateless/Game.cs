@@ -1,40 +1,42 @@
-using System.Diagnostics;
 using System.Text.Json;
-using CarStateMachine.CarStateManagerFactory;
-using CarStateMachine.Persistence;
+using StateMachine.Persistence.Constants;
+using StateMachine.VehicleStateMachineFactory;
 
-namespace CarStateMachine;
+namespace StateMachine;
 
 public class Game
 {
-    private readonly ICarStateManagerFactory _createManagerFactory;
-    private readonly ICarStateRepository _carStateRepository;
+    private readonly IVehicleFactory _vehicleFactory;
 
-    public Game(ICarStateManagerFactory createManagerFactory, ICarStateRepository carStateRepository)
+    public Game(IVehicleFactory vehicleFactory)
     {
-        _createManagerFactory = createManagerFactory;
-        _carStateRepository = carStateRepository;
+        _vehicleFactory = vehicleFactory;
     }
 
-    public void Start(CarType type)
+    public void Start(VehicleType type, string vehicleId)
     {
-        var carStateManager = _createManagerFactory.GetCarStateManager(type);
+        var stateMachine = _vehicleFactory.CreateVehicleStateMachine(type, vehicleId);
 
-        var carEntity = _carStateRepository.GetByName("Name1");
-
-        Debug.Assert(carEntity != null, nameof(carEntity) + " != null");
-        
-        var car = new Car(carEntity.Name, carEntity.State, carEntity.Speed, _carStateRepository);
-        
         string? input;
         do
         {
-            Console.WriteLine($"Current car state : {car.CurrentState} " +
-                              $"\tChoices : {JsonSerializer.Serialize(car.PermittedTriggers)}");
+            Console.Write($"Current car {stateMachine.Id} at state : {stateMachine.GetCurrentState}\n" +
+                          $"\tChoices : {JsonSerializer.Serialize(stateMachine.GetPermittedTriggers)} or 'q' to quit : ");
+
             input = Console.ReadLine();
-            carStateManager.ProcessUserInput(input, car);
+            if (input == "q") break;
+            if (input == "" && stateMachine.GetPermittedTriggers.Contains("Start")) input = "Start";
+
+            try
+            {
+                if (input != null) stateMachine.TakeAction(input);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         } while (input != "q");
 
-        Console.WriteLine("Bye bye");
+        Console.WriteLine("Game ended");
     }
 }

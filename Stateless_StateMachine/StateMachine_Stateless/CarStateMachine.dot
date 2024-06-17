@@ -1,0 +1,17 @@
+digraph {
+compound=true;
+node [shape=Mrecord]
+rankdir="LR"
+"Stopped" [label="Stopped|entry / Function\nexit / PrintState"];
+"Started" [label="Started|entry / Function\nexit / PrintState"];
+"Running" [label="Running"];
+
+"Stopped" -> "Started" [style="solid", label="Start"];
+"Started" -> "Running" [style="solid", label="Accelerate / Function"];
+"Started" -> "Stopped" [style="solid", label="Stop"];
+"Running" -> "Stopped" [style="solid", label="Stop [Function]"];
+"Running" -> "Running" [style="solid", label="Accelerate [Function]"];
+"Running" -> "Running" [style="solid", label="Decelerate [Function]"];
+ init [label="", shape=point];
+ init -> "Started"[style = "solid"]
+}
