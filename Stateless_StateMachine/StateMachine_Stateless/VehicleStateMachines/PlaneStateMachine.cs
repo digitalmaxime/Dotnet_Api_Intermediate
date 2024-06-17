@@ -8,7 +8,7 @@ namespace StateMachine.VehicleStateMachines;
 
 public class PlaneStateMachine : IVehicleStateMachine
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     public enum PlaneState
     {
@@ -40,10 +40,10 @@ public class PlaneStateMachine : IVehicleStateMachine
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
-    public PlaneStateMachine(string id, IServiceProvider serviceProvider)
+    public PlaneStateMachine(string id, IServiceScopeFactory serviceScopeFactory)
     {
         Id = id;
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
         _stateMachine = new StateMachine<PlaneState, PlaneAction>(
             () => CurrentState,
             (s) =>
@@ -63,7 +63,8 @@ public class PlaneStateMachine : IVehicleStateMachine
 
     private async Task InitializeStateMachine(string id)
     {
-        var planeStateRepository = _serviceProvider.GetRequiredService<IPlaneStateRepository>();
+        using var scope = _serviceScopeFactory.CreateScope();
+        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
         var plane = planeStateRepository.GetById(id);
         if (plane == null)
         {
@@ -129,7 +130,8 @@ public class PlaneStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
-        var planeStateRepository = _serviceProvider.GetRequiredService<IPlaneStateRepository>();
+        using var scope = _serviceScopeFactory.CreateScope();
+        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
         var plane = new PlaneEntity()
         {
             Id = Id, Speed = CurrentSpeed, State = CurrentState
