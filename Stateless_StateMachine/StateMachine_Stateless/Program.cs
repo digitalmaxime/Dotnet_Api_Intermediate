@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StateMachine;
 using StateMachine.Persistence;
+using StateMachine.Persistence.Constants;
 using StateMachine.Persistence.Contracts;
+using StateMachine.Persistence.Domain;
 using StateMachine.Persistence.Repositories;
 using StateMachine.VehicleStateMachineFactory;
 
@@ -12,7 +14,6 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddDbContext<VehicleDbContext>();
 builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
 builder.Services.AddScoped<IPlaneStateRepository, PlaneStateRepository>();
-
 builder.Services.AddSingleton<IVehicleFactory, VehicleFactory>();
 
 builder.Services.AddSingleton<Game>();

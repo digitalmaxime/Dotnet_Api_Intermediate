@@ -1,4 +1,5 @@
 using System.Text.Json;
+using StateMachine.Persistence.Constants;
 using StateMachine.VehicleStateMachineFactory;
 
 namespace StateMachine;

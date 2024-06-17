@@ -1,7 +1,6 @@
-using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
 
-namespace StateMachine.Persistence.Repositories;
+namespace StateMachine.Persistence.Contracts;
 
 public interface IPlaneStateRepository : IEntityWithIdRepository<PlaneEntity>
 {

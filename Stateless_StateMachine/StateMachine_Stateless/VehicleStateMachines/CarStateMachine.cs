@@ -9,7 +9,7 @@ namespace StateMachine.VehicleStateMachines;
 
 public class CarStateMachine : IVehicleStateMachine
 {
-    private readonly IServiceScopeFactory _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public enum CarState
     {
@@ -30,26 +30,26 @@ public class CarStateMachine : IVehicleStateMachine
 
     public string Id { get; set; }
     private int CurrentSpeed { get; set; }
-    private CarState CurrentCarState { get; set; }
-    public string GetCurrentState => CurrentCarState.ToString();
+    private CarState CurrentState { get; set; }
+    public string GetCurrentState => CurrentState.ToString();
+    private readonly StateMachine<CarState, CarAction> _stateMachine;
     public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
 
-    private StateMachine<CarState, CarAction> _stateMachine;
 
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
 
-    public CarStateMachine(string id, IServiceScopeFactory serviceProvider)
+    public CarStateMachine(string id, IServiceProvider serviceProvider)
     {
         Id = id;
         _serviceProvider = serviceProvider;
 
         _stateMachine = new StateMachine<CarState, CarAction>(
-            () => CurrentCarState,
+            () => CurrentState,
             (s) =>
             {
-                CurrentCarState = s;
+                CurrentState = s;
                 SaveState();
             }
         );
@@ -58,10 +58,14 @@ public class CarStateMachine : IVehicleStateMachine
         ConfigureStates();
     }
 
+    ~CarStateMachine()
+    {
+        Console.WriteLine("~CarStateMachine xox");
+    }
+
     private async Task InitializeStateMachine(string id)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var carStateRepository = scope.ServiceProvider.GetRequiredService<ICarStateRepository>();
+        var carStateRepository = _serviceProvider.GetRequiredService<ICarStateRepository>();
         var car = carStateRepository.GetById(id);
         if (car == null)
         {
@@ -73,13 +77,8 @@ public class CarStateMachine : IVehicleStateMachine
             await carStateRepository.Save(car);
         }
 
-        CurrentCarState = car.State;
+        CurrentState = car.State;
         CurrentSpeed = car.Speed;
-    }
-
-    ~CarStateMachine()
-    {
-        Console.WriteLine("~CarStateMachine xox");
     }
 
     private void ConfigureStates()
@@ -128,19 +127,18 @@ public class CarStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
-        using var scope = _serviceProvider.CreateScope();
-        var carStateRepository = scope.ServiceProvider.GetRequiredService<ICarStateRepository>();
+        var carStateRepository = _serviceProvider.GetRequiredService<ICarStateRepository>();
         var carEntity = new CarEntity()
         {
-            Id = Id, Speed = CurrentSpeed, State = CurrentCarState
+            Id = Id, Speed = CurrentSpeed, State = CurrentState
         };
 
         carStateRepository.Save(carEntity);
     }
 
-    public void TakeAction(string carActionStr)
+    public void TakeAction(string actionString)
     {
-        Enum.TryParse<CarAction>(carActionStr, out var carAction);
+        Enum.TryParse<CarAction>(actionString, out var carAction);
 
         switch (carAction)
         {

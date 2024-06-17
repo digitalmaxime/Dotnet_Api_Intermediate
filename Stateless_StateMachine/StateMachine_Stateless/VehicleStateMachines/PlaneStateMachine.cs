@@ -1,14 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Stateless;
+using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
-using StateMachine.Persistence.Repositories;
 using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
 
 public class PlaneStateMachine : IVehicleStateMachine
 {
-    private readonly IPlaneStateRepository _planeStateRepository;
+    private readonly IServiceProvider _serviceProvider;
 
     public enum PlaneState
     {
@@ -29,34 +29,30 @@ public class PlaneStateMachine : IVehicleStateMachine
     }
 
     public string Id { get; set; }
-    private PlaneState CurrentPlaneState { get; set; }
-    private StateMachine<PlaneState, PlaneAction> _stateMachine;
-    public string GetCurrentState => CurrentPlaneState.ToString();
     private int CurrentSpeed { get; set; }
     public int Altitude { get; set; }
-
+    private PlaneState CurrentState { get; set; }
+    public string GetCurrentState => CurrentState.ToString();
+    private readonly StateMachine<PlaneState, PlaneAction> _stateMachine;
     public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
+
 
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
-    public PlaneStateMachine()
-    {
-        
-    }
     public PlaneStateMachine(string id, IServiceProvider serviceProvider)
     {
-        _planeStateRepository = serviceProvider.GetRequiredService<IPlaneStateRepository>();
         Id = id;
+        _serviceProvider = serviceProvider;
         _stateMachine = new StateMachine<PlaneState, PlaneAction>(
-            () => CurrentPlaneState,
+            () => CurrentState,
             (s) =>
             {
-                CurrentPlaneState = s;
+                CurrentState = s;
                 SaveState();
             }
         );
-        InitializeStateMachine(id);
+        InitializeStateMachine(id).GetAwaiter();
         ConfigureStates();
     }
 
@@ -65,9 +61,10 @@ public class PlaneStateMachine : IVehicleStateMachine
         Console.WriteLine("~PlaneStateMachine xox");
     }
 
-    private void InitializeStateMachine(string id)
+    private async Task InitializeStateMachine(string id)
     {
-        var plane = _planeStateRepository.GetById(id);
+        var planeStateRepository = _serviceProvider.GetRequiredService<IPlaneStateRepository>();
+        var plane = planeStateRepository.GetById(id);
         if (plane == null)
         {
             plane = new PlaneEntity()
@@ -75,10 +72,10 @@ public class PlaneStateMachine : IVehicleStateMachine
                 Id = id, Speed = 0, State = PlaneState.Stopped
             };
             
-            _planeStateRepository.Save(plane);
+            await planeStateRepository.Save(plane);
         }
 
-        CurrentPlaneState = plane.State;
+        CurrentState = plane.State;
         CurrentSpeed = plane.Speed;
     }
     
@@ -132,16 +129,18 @@ public class PlaneStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
+        var planeStateRepository = _serviceProvider.GetRequiredService<IPlaneStateRepository>();
         var plane = new PlaneEntity()
         {
-            Id = Id, Speed = CurrentSpeed, State = CurrentPlaneState
+            Id = Id, Speed = CurrentSpeed, State = CurrentState
         };
-        _planeStateRepository?.Save(plane);
+        
+        planeStateRepository.Save(plane);
     }
 
-    public void TakeAction(string actionStr)
+    public void TakeAction(string actionString)
     {
-        Enum.TryParse<PlaneAction>(actionStr, out var action);
+        Enum.TryParse<PlaneAction>(actionString, out var action);
 
         switch (action)
         {
@@ -158,7 +157,7 @@ public class PlaneStateMachine : IVehicleStateMachine
                 return;
 
             case PlaneAction.Decelerate:
-                _stateMachine.Fire(_decelerateWithParam, Max(CurrentSpeed - 45, 0));
+                _stateMachine.Fire(_decelerateWithParam, Max(CurrentSpeed - 35, 0));
                 return;
             
             case PlaneAction.Fly:
