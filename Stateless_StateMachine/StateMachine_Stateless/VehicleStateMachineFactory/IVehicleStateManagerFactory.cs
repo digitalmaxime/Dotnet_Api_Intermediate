@@ -1,4 +1,3 @@
-using StateMachine.Persistence;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.VehicleStateMachineFactory;

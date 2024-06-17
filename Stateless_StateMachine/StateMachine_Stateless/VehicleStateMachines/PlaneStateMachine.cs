@@ -1,5 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
 using Stateless;
-using StateMachine.Persistence;
 using StateMachine.Persistence.Domain;
 using StateMachine.Persistence.Repositories;
 using static System.Int32;
@@ -8,7 +8,7 @@ namespace StateMachine.VehicleStateMachines;
 
 public class PlaneStateMachine : IVehicleStateMachine
 {
-    private readonly IEntityWithIdRepository<PlaneEntity> _planeStateRepository;
+    private readonly IPlaneStateRepository _planeStateRepository;
 
     public enum PlaneState
     {
@@ -40,10 +40,22 @@ public class PlaneStateMachine : IVehicleStateMachine
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
-    public PlaneStateMachine(string id, IEntityWithIdRepository<PlaneEntity> planeStateRepository)
+    public PlaneStateMachine()
     {
-        _planeStateRepository = planeStateRepository;
+        
+    }
+    public PlaneStateMachine(string id, IServiceProvider serviceProvider)
+    {
+        _planeStateRepository = serviceProvider.GetRequiredService<IPlaneStateRepository>();
         Id = id;
+        _stateMachine = new StateMachine<PlaneState, PlaneAction>(
+            () => CurrentPlaneState,
+            (s) =>
+            {
+                CurrentPlaneState = s;
+                SaveState();
+            }
+        );
         InitializeStateMachine(id);
         ConfigureStates();
     }
@@ -58,25 +70,16 @@ public class PlaneStateMachine : IVehicleStateMachine
         var plane = _planeStateRepository.GetById(id);
         if (plane == null)
         {
-            var newPlane = new PlaneEntity()
+            plane = new PlaneEntity()
             {
                 Id = id, Speed = 0, State = PlaneState.Stopped
             };
             
-            _planeStateRepository.Save(newPlane);
+            _planeStateRepository.Save(plane);
         }
 
-        CurrentPlaneState = plane?.State ?? PlaneState.Stopped;
-        CurrentSpeed = plane?.Speed ?? -1;
-
-        _stateMachine = new StateMachine<PlaneState, PlaneAction>(
-            () => CurrentPlaneState,
-            (s) =>
-            {
-                CurrentPlaneState = s;
-                SaveState();
-            }
-        );
+        CurrentPlaneState = plane.State;
+        CurrentSpeed = plane.Speed;
     }
     
     private void ConfigureStates()

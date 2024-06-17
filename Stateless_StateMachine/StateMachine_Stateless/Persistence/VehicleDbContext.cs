@@ -6,9 +6,14 @@ namespace StateMachine.Persistence;
 
 public class VehicleDbContext : DbContext
 {
+    public VehicleDbContext(DbContextOptions<VehicleDbContext> options) : base(options)
+    {
+        
+    }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseInMemoryDatabase("VehicleState");
+        optionsBuilder.EnableSensitiveDataLogging();
         base.OnConfiguring(optionsBuilder);
     }
 
@@ -37,6 +42,6 @@ public class VehicleDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public DbSet<CarEntity> CarEntity { get; set; }
-    public DbSet<PlaneEntity> PlaneEntity { get; set; }
+    public DbSet<CarEntity> CarEntity { get; set; } = default!;
+    public DbSet<PlaneEntity> PlaneEntity { get; set; } = default!;
 }

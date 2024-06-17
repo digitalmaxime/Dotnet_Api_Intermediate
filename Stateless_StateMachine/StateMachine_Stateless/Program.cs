@@ -3,23 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StateMachine;
 using StateMachine.Persistence;
-using StateMachine.Persistence.Domain;
+using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Repositories;
 using StateMachine.VehicleStateMachineFactory;
-using StateMachine.VehicleStateMachines;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<VehicleDbContext>();
-
-// builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
-// builder.Services.AddScoped<IPlaneStateRepository, PlaneStateRepository>();
-builder.Services.AddScoped<IEntityWithIdRepository<CarEntity>, EntityWithIdRepository<CarEntity>>();
-builder.Services.AddScoped<IEntityWithIdRepository<PlaneEntity>, EntityWithIdRepository<PlaneEntity>>();
-builder.Services.AddScoped<IVehicleFactory, VehicleFactory>();
-
-builder.Services.AddKeyedScoped<IVehicleStateMachine, CarStateMachine>("car");
-builder.Services.AddKeyedScoped<IVehicleStateMachine, PlaneStateMachine>("plane");
+builder.Services.AddScoped<ICarStateRepository, CarStateRepository>();
+builder.Services.AddScoped<IPlaneStateRepository, PlaneStateRepository>();
 
 builder.Services.AddSingleton<IVehicleFactory, VehicleFactory>();
 

@@ -24,6 +24,7 @@ public class Game
 
             input = Console.ReadLine();
             if (input == "q") break;
+            if (input == "" && stateMachine.GetPermittedTriggers.Contains("Start")) input = "Start";
 
             try
             {

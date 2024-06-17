@@ -1,13 +1,16 @@
+using Microsoft.Extensions.DependencyInjection;
 using Stateless;
 using Stateless.Graph;
+using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
-using StateMachine.Persistence.Repositories;
 using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
 
 public class CarStateMachine : IVehicleStateMachine
 {
+    private readonly IServiceScopeFactory _serviceProvider;
+
     public enum CarState
     {
         Stopped,
@@ -32,35 +35,15 @@ public class CarStateMachine : IVehicleStateMachine
     public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
 
     private StateMachine<CarState, CarAction> _stateMachine;
-    private readonly IEntityWithIdRepository<CarEntity> _carStateRepository;
 
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _accelerateWithParam;
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _decelerateWithParam;
 
 
-    public CarStateMachine(string id, IEntityWithIdRepository<CarEntity> carStateRepository)
+    public CarStateMachine(string id, IServiceScopeFactory serviceProvider)
     {
         Id = id;
-        _carStateRepository = carStateRepository;
-        InitializeStateMachine(id);
-        ConfigureStates();
-    }
-
-    private void InitializeStateMachine(string id)
-    {
-        var car = _carStateRepository.GetById(id);
-        if (car == null)
-        {
-            var newCarEntity = new CarEntity()
-            {
-                Id = id, Speed = 0, State = CarState.Stopped
-            };
-            
-            _carStateRepository.Save(newCarEntity);
-        }
-
-        CurrentCarState = car?.State ?? CarState.Stopped;
-        CurrentSpeed = car?.Speed ?? -1;
+        _serviceProvider = serviceProvider;
 
         _stateMachine = new StateMachine<CarState, CarAction>(
             () => CurrentCarState,
@@ -70,6 +53,28 @@ public class CarStateMachine : IVehicleStateMachine
                 SaveState();
             }
         );
+        
+        InitializeStateMachine(id).GetAwaiter();
+        ConfigureStates();
+    }
+
+    private async Task InitializeStateMachine(string id)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var carStateRepository = scope.ServiceProvider.GetRequiredService<ICarStateRepository>();
+        var car = carStateRepository.GetById(id);
+        if (car == null)
+        {
+            car = new CarEntity()
+            {
+                Id = id, Speed = 0, State = CarState.Stopped
+            };
+
+            await carStateRepository.Save(car);
+        }
+
+        CurrentCarState = car.State;
+        CurrentSpeed = car.Speed;
     }
 
     ~CarStateMachine()
@@ -123,12 +128,14 @@ public class CarStateMachine : IVehicleStateMachine
 
     private void SaveState()
     {
+        using var scope = _serviceProvider.CreateScope();
+        var carStateRepository = scope.ServiceProvider.GetRequiredService<ICarStateRepository>();
         var carEntity = new CarEntity()
         {
             Id = Id, Speed = CurrentSpeed, State = CurrentCarState
         };
-        
-        _carStateRepository?.Save(carEntity);
+
+        carStateRepository.Save(carEntity);
     }
 
     public void TakeAction(string carActionStr)

@@ -1,44 +1,38 @@
+using Microsoft.EntityFrameworkCore;
+using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
-using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.Persistence.Repositories;
-
-public interface IEntityWithIdRepository<T> where T : EntityWithId
-{
-    void Save(T entity);
-    T? GetById(string id);
-}
 
 public class EntityWithIdRepository<T> : IEntityWithIdRepository<T> where T : EntityWithId
 {
     private readonly VehicleDbContext _dbContext;
 
-    public EntityWithIdRepository(VehicleDbContext dbContext)
+    protected EntityWithIdRepository(VehicleDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public void Save(T entity)
+    public async Task Save(T entity)
     {
-        var vehicleEntity = _dbContext.Set<T>().FirstOrDefault(x => x.Id == entity.Id);
+        var id = entity.Id;
+        var vehicleEntity =
+            await _dbContext.Set<T>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
         if (vehicleEntity == null)
         {
-            
-            _dbContext.Set<T>().Add(entity);
+            await _dbContext.Set<T>().AddAsync(entity);
         }
         else
         {
-            _dbContext.Set<T>().Update(entity); // TODO: valider
-            // vehicleEntity.State = state;
-            // vehicleEntity.Speed = speed;
+            _dbContext.Set<T>().Update(entity);
         }
 
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 
     public T? GetById(string id)
     {
-        return _dbContext.Set<T>().FirstOrDefault(c => c.Id == id);
+        return _dbContext.Set<T>().AsNoTracking().FirstOrDefault(c => c.Id == id);
     }
 }

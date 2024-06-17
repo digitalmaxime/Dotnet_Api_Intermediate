@@ -1,21 +1,17 @@
-using StateMachine.Persistence;
-using StateMachine.Persistence.Domain;
-using StateMachine.Persistence.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.VehicleStateMachineFactory;
 
 public class VehicleFactory : IVehicleFactory
 {
-    private readonly IEntityWithIdRepository<CarEntity> _carStateRepository;
-    private readonly IEntityWithIdRepository<PlaneEntity> _planeStateRepository;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly Dictionary<string, CarStateMachine> _carStateMachineDictionary = new();
     private readonly Dictionary<string, PlaneStateMachine> _planeStateMachineDictionary = new();
 
-    public VehicleFactory(IEntityWithIdRepository<CarEntity> carStateRepository, IEntityWithIdRepository<PlaneEntity> planeStateRepository)
+    public VehicleFactory(IServiceScopeFactory serviceScopeFactory)
     {
-        _carStateRepository = carStateRepository;
-        _planeStateRepository = planeStateRepository;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     private CarStateMachine GetOrAddCarStateMachine(string id)
@@ -23,7 +19,7 @@ public class VehicleFactory : IVehicleFactory
         var success = _carStateMachineDictionary.TryGetValue(id, out var stateMachine);
         if (!success)
         {
-            stateMachine = new CarStateMachine(id, _carStateRepository);
+            stateMachine = new CarStateMachine(id, _serviceScopeFactory);
             _carStateMachineDictionary.Add(id, stateMachine);
         }
 
@@ -35,7 +31,7 @@ public class VehicleFactory : IVehicleFactory
         var success = _planeStateMachineDictionary.TryGetValue(id, out var stateMachine);
         if (!success)
         {
-            stateMachine = new PlaneStateMachine(id, _planeStateRepository);
+            stateMachine = new PlaneStateMachine(); // TODO: Add id and serviceProvider
             _planeStateMachineDictionary.Add(id, stateMachine);
         }
 
