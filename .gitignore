@@ -5,5 +5,5 @@ Debug/
 .idea/
 Migrations/
 .vscode/
-
+*/cache/
 .DS_Store
