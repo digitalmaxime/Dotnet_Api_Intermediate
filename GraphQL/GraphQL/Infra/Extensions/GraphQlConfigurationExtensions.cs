@@ -1,7 +1,8 @@
+using GraphQL.Infra.GraphQL.Platforms;
 using GraphQL.Infra.GraphQL.Queries;
 using GraphQL.Persistence.Context;
 
-namespace GraphQL.Infra.GraphQL.Extensions;
+namespace GraphQL.Infra.Extensions;
 
 public static class GraphQlConfigurationExtensions
 {
@@ -10,6 +11,9 @@ public static class GraphQlConfigurationExtensions
         serviceCollection
             .AddGraphQLServer()
             .RegisterDbContext<DemoDbContext>()
-            .AddQueryType<Query>();
+            .AddQueryType<MyQuery>()
+            .AddType<PlatformType>()
+            .AddType<PlatformType.CommandSubset>()
+            ;
     }
 }

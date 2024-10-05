@@ -8,5 +8,7 @@ public class Platform
     
     public string? Description { get; set; }
 
+    public string LiscenceKey { get; set; } = string.Empty;
+
     public ICollection<Command>? Commands { get; set; } = new List<Command>();
 }

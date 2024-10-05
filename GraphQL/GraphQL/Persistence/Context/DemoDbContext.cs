@@ -17,7 +17,7 @@ public class DemoDbContext : DbContext
         // modelBuilder.ApplyConfiguration(new PlatformEntityConfiguration());
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PersistenceLibrary).Assembly);
 
-        modelBuilder.ConfigureData();
+        modelBuilder.SeedData();
     }
 
     public DbSet<Platform> Platforms { get; set; }

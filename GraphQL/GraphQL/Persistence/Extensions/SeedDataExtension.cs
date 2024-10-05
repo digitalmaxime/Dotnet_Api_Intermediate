@@ -5,19 +5,21 @@ namespace GraphQL.Persistence.Extensions;
 
 public static class SeedDataExtension
 {
-    public static void ConfigureData(this ModelBuilder modelBuilder)
+    public static void SeedData(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Platform>().HasData(new Platform()
             {
                 Id = 1,
                 Name = "Dotnet",
                 Description = "A platform for building applications using C#",
+                LiscenceKey = "asdf"
             },
             new Platform()
             {
                 Id = 2,
                 Name = "Docker",
                 Description = "A platform for building applications using containers",
+                LiscenceKey = "asdf"
             },
             new Platform()
             {

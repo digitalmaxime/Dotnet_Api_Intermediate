@@ -1,4 +1,4 @@
-using GraphQL.Infra.GraphQL.Extensions;
+using GraphQL.Infra.Extensions;
 using GraphQL.Persistence.Context;
 using GraphQL.Persistence.Extensions;
 using GraphQL.Server.Ui.Voyager;

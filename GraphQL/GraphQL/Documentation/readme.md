@@ -15,7 +15,8 @@ Visualizing the data with GraphQL localhost:5000/graphql
 - [Filtering and Sorting](#filtering-and-sorting)
 - [Mutations](#mutations)
 - [Subscriptions](#subscriptions)
-- [Consuming GraphQL](#Consuming-GraphQL)
+- [Consuming GraphQL](#consuming-graphql)
+- [Documentation](#documentation)
 - [Reference](#reference)
 
 ## Ingredients and Tooling
@@ -93,7 +94,7 @@ serviceCollection
 
 ```csharp
 app.MapGraphQL();
-app.UseGraphQLVoyage(new GraphQLVoyagerOptions());
+app.UseGraphQLVoyage(new GraphQLVoyagerOptions()); // usefull for visualizing the schema
 ```
 
 ### Revisit DbContext
@@ -127,9 +128,20 @@ see [pooled dbcontext with hotchocolat](https://chillicream.com/docs/hotchocolat
 
 ## Multi-Model
 
-## Annotation vs Code First
-
 ## Introducing Types
+
+We want to segregate the application's entities / models from the GraphQL types
+
+In order to achieve this, we need to create a new folder called "Types" and create a new class for each entity
+
+The `PlatformType` class will inherit from hotchocolate's `ObjectType<Platform>` and override the `Configure` method
+
+```csharp
+public class PlatformType : ObjectType<Platform>
+{
+    protected override void Configure(IObjectTypeDescriptor<Platform> descriptor)
+    {
+```
 
 ## Filtering and Sorting
 
@@ -171,6 +183,14 @@ query {
   }
  }
 ```
+
+## Documentation
+
+We can add Description to the fields and types
+
+Using GraphQL Voyager to visualize the schema (with the `GraphQL.Server.Ui.Voyager` package)
+
+
 
 ## Reference
 
