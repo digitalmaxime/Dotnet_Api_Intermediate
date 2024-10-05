@@ -13,7 +13,6 @@ public static class GraphQlConfigurationExtensions
             .RegisterDbContext<DemoDbContext>()
             .AddQueryType<MyQuery>()
             .AddType<PlatformType>()
-            .AddType<PlatformType.CommandSubset>()
             ;
     }
 }

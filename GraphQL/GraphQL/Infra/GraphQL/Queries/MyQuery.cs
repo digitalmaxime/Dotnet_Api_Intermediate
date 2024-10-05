@@ -11,7 +11,7 @@ public class MyQuery
     public IQueryable<Platform> GetPlatform([Service(ServiceKind.Synchronized)] DemoDbContext context)
     {
         return context.Platforms
-            // .Include(p => p.Commands)
+            // .Include(p => p.Commands) -- no need with Resolvers apparently
             .AsNoTracking();
     }
     
