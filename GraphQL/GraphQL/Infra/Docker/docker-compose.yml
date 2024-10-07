@@ -1,7 +1,7 @@
 # docker compose up --detach
 version: '3'
 services:
-  # docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d nxrm.corp.bdc.ca:4445/mssql2019:latest
+  # docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=yourStrong(!)Password' -p 1433:1433 -d mssql2019:latest
   # EULA : End-User Liscence Agreement
   # Server : localhost, User : SA, Password ; password!123
   # "DefaultConnection": "Server=localhost;Database=PlatformCommandDemoDb;User Id=SA;Password=password!123;TrustServerCertificate=True"

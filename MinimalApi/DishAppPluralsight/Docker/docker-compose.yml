@@ -6,7 +6,7 @@ version: '3'
 name: "dishappdatabase"
 services:
   mysql-db:
-    image: nxrm.corp.bdc.ca:4445/library/mysql:8.0
+    image: library/mysql:8.0
     restart: always
     expose:
       - 3306
