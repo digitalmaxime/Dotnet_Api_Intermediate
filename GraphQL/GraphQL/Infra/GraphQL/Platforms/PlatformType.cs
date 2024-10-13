@@ -7,8 +7,6 @@ public class PlatformType : ObjectType<Platform>
 {
     protected override void Configure(IObjectTypeDescriptor<Platform> descriptor)
     {
-        descriptor.Description("Represents the platform's unique identifier");
-
         descriptor
             .Field(p => p.Id)
             .Type<NonNullType<IntType>>();

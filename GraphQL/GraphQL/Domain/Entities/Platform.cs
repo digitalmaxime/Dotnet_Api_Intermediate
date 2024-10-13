@@ -2,10 +2,10 @@ namespace GraphQL.Domain.Entities;
 
 public class Platform
 {
-    public required int Id { get; set; }
-    
+    public int Id { get; init; }
+
     public required string Name { get; set; }
-    
+
     public string? Description { get; set; }
 
     public string LiscenceKey { get; set; } = string.Empty;

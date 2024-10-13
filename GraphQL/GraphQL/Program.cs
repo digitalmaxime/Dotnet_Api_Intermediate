@@ -32,6 +32,7 @@ app.UseGraphQLVoyager("/graphql-voyager", new VoyagerOptions()
     GraphQLEndPoint = "/graphql"
 });
 
+app.UseWebSockets();
 
 app.MapGet("/", async (HttpContext context, DemoDbContext dbContext) =>
 {
