@@ -5,15 +5,42 @@ services:
   # EULA : End-User Liscence Agreement
   # Server : localhost, User : SA, Password ; password!123
   # "DefaultConnection": "Server=localhost;Database=PlatformCommandDemoDb;User Id=SA;Password=password!123;TrustServerCertificate=True"
-  mssql-db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+  # mssql-db:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   restart: always
+  #   expose:
+  #     - 1433
+  #   ports:
+  #     - 1433:1433
+  #   environment:
+  #     NAME: "mssql-db"
+  #     HOSTNAME: "mssql-db"
+  #     ACCEPT_EULA: Y
+  #     MSSQL_SA_PASSWORD: password!123
+
+
+  postgress-db:
+    container_name: Postgres-Container
+    image: postgres
     restart: always
-    expose:
-      - 1433
-    ports:
-      - 1433:1433
     environment:
-      NAME: "mssql-db"
-      HOSTNAME: "mssql-db"
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: password!123
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: password!123
+      # NAME: "postgres-db-name"
+      # HOSTNAME: "postgres-db-hostname"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_DB: "postgress-db-postgres_db_name"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql
+      # - pgdata:/var/lib/postgresql/data 
+    ports:
+       - 5432:5432
+ 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+ 
+volumes:
+  pgdata:
