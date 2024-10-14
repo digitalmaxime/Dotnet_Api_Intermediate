@@ -1,6 +1,6 @@
 # GraphQL with .NET Core
 
-Demo using dockerized mssql and graphql with .net core
+Graphql demo with .net core and Hotchocolate using dockerized database
 
 Visualizing the data with GraphQL localhost:5000/graphql
 
@@ -9,8 +9,6 @@ Visualizing the data with GraphQL localhost:5000/graphql
 - [Ingredients and Tooling](#ingredients-and-tooling)
 - [GraphQL Theory](#graphql-theory)
 - [Project Setup](#project-setup)
-- [Multi-Model](#multi-model)
-- [Annotation vs Code First](#annotation-vs-code-first)
 - [Introducing Types](#introducing-types)
 - [Filtering and Sorting](#filtering-and-sorting)
 - [Mutations](#mutations)
@@ -23,7 +21,7 @@ Visualizing the data with GraphQL localhost:5000/graphql
 
 - `HotChocolate.AspNetCore`
 - `HotChocolate.Data.EntityFramework`
-- `GraphQL.Server.Ui.Voyager` for the UI of GraphQL
+- `GraphQL.Server.Ui.Voyager` for the UI of GraphQL (non essential)
 - `Microsoft.EntityFrameworkCore.Design` for dotnet-ef migrations
 - `Microsoft.EntityFrameworkCore.SqlServer` for SQL Server
 
@@ -41,7 +39,7 @@ Open Source in 2015 hosted by the Linux Foundation
 
 ### Why GraphQL?
 
-**Rest** does and under overfetching..
+**Rest** does _and_ under overfetching..
 
 **GraphQL** allows you to request only the data you need
 
@@ -50,25 +48,25 @@ Open Source in 2015 hosted by the Linux Foundation
 - **Schema**
     - describes the API in full
     - Self documenting
-    - Comprised to "Types"
+    - Comprised of "Types"
     - Must have a "Root Query Type"
-    - ```
-      schema {
-          query: MyQuery
-          }
-      ```
+        ```
+        schema {
+            query: MyQuery
+        }
+        ```
 - **Types**
     - Scalar
         - Int, Float, String, Boolean, ID
     - Object
         - Custom types
-         ```
+        ```
             type: Person {
                 id: ID!
                 name: String!
                 age: Int
             }
-      ```
+        ```
     - Query
         - Entry point for the API
       ```
@@ -96,7 +94,6 @@ Open Source in 2015 hosted by the Linux Foundation
     - Where the data comes from
     - Could be a database, REST API, etc
 
-### GraphQL .NET
 
 ## Project Setup
 
@@ -162,11 +159,10 @@ Another option is to use the "AddPooledDbContextFactory", which is more complex 
 
 see [pooled dbcontext with hotchocolat](https://chillicream.com/docs/hotchocolate/v13/integrations/entity-framework#dbcontextkindpooled)
 
-## Multi-Model
 
 ## Introducing Types
 
-We want to segregate the application's entities / models from the GraphQL types
+We want to decouple the application's entities / models from the GraphQL types
 
 In order to achieve this, we can create a new class for each entity
 
@@ -198,6 +194,7 @@ serviceCollection
             .AddType<PlatformType>() <--- Add this line
 ```
 
+
 ## Filtering and Sorting
 
 ```csharp
@@ -224,8 +221,8 @@ Don't forget to add the QueryType in the `ServiceCollection`
 ```csharp
 services.AddGraphQLServer()
     // Your schema configuration
-    .AddQueryType<QueryType>() <--- Add this line
-    .AddFiltering();
+    .AddQueryType<QueryType>()
+    .AddFiltering(); <--- Add this line
 ```
 
 query example : 
@@ -241,6 +238,36 @@ query Platforms {
 
 ## Mutations
 
+Allows for data update
+
+Is homologous to Query Type, but while query fields are executed in parallel, mutation fields run in series, one after the other.
+
+A mutation type can take an Input and return a Payload which are kinda like data transfer object.
+
+C# example code 
+```csharp
+public async Task<AddPlatformInput> AddPlatformAsync(AddPlatformInput input, [Service(ServiceKind.Synchronized)] DemoDbContext) {
+    var platform = new Platform { ... }
+    // db context Add + Save
+    return new AddPlatformPayload(platform);
+}
+
+```
+
+Query example code
+```graphql
+mutation AddPlatform {
+    addPlatform(input: {name: "Azure"}) {
+        platform {
+            id
+            name
+            description
+        }
+    }
+}
+```
+
+
 ## Subscriptions
 
 works using websockets
@@ -254,11 +281,12 @@ app.UseWebSockets(); <--- Add this line to the request pipeline
 services.AddGraphQLServer()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
-    .AddSubscriptionType<Subscription>() <--- Add this line
     .AddFiltering()
     .AddSorting()
+    .AddSubscriptionType<Subscription>() <--- Add this line
     .AddInMemorySubscriptions(); <--- Add this line
 ```
+
 
 ## Consuming GraphQL
 
@@ -306,7 +334,7 @@ Using GraphQL Voyager to visualize the schema (with the `GraphQL.Server.Ui.Voyag
 https://localhost:7156/graphql-voyager
 
 ## Reference
-
+- [GraphQL](https://graphql.org/)
 - [Les Jackson](https://www.youtube.com/watch?v=HuN94qNwQmM&ab_channel=LesJackson)
 - [HotChocolate](https://chillicream.com/docs/hotchocolate/getting-started)
 - [HotChocolate with EntityFrameWork](https://chillicream.com/docs/hotchocolate/v13/integrations/entity-framework)
