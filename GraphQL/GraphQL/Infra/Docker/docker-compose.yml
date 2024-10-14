@@ -26,13 +26,9 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: password!123
-      # NAME: "postgres-db-name"
-      # HOSTNAME: "postgres-db-hostname"
       PGDATA: "/var/lib/postgresql/data/pgdata"
-      POSTGRES_DB: "postgress-db-postgres_db_name"
     volumes:
       - ./postgres_data:/var/lib/postgresql
-      # - pgdata:/var/lib/postgresql/data 
     ports:
        - 5432:5432
  

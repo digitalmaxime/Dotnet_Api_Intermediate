@@ -1,8 +1,9 @@
 # GraphQL with .NET Core
 
-Graphql demo with .net core and Hotchocolate using dockerized database
+Graphql demo with .net core and Hotchocolate using dockerized database (postgres or mssql)
 
 Visualizing the data with GraphQL localhost:5000/graphql
+
 
 ## Implementation steps
 
@@ -96,6 +97,13 @@ Open Source in 2015 hosted by the Linux Foundation
 
 
 ## Project Setup
+
+### Database 
+
+```csharp
+"DefaultConnection": "Host=localhost;Port=5432;Database=postgres-db-hostname;Username=postgres;Password=password!123;" <-- use this if postgres
+// "DefaultConnection": "Server=localhost;Database=PlatformCommandDemoDb;User Id=SA;Password=password!123;TrustServerCertificate=True"  <-- use this if mssql
+```
 
 ### Main Configs and Startup
 

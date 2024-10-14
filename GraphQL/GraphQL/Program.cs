@@ -5,7 +5,6 @@ using GraphQL.Server.Ui.Voyager;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.RegisterPersistenceServices(builder.Configuration);
@@ -16,9 +15,10 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development
     builder.Services.EnsureDatabaseCreated();
 }
 
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
