@@ -31,7 +31,7 @@ var game = app.Services.GetService<Game>();
 
 var availableVehicleTypes = JsonSerializer.Serialize(Enum.GetNames<VehicleType>());
 
-bool wannaStartGame;
+bool userWhichesToContinue;
 do
 {
     Console.Write($"Choose a vehicle type : {availableVehicleTypes} : ");
@@ -40,10 +40,11 @@ do
     Console.Write("Choose a vehicle id : ");
     var vehicleId = Console.ReadLine();
 
-    game!.Start(success ? type : VehicleType.Car, string.IsNullOrEmpty(vehicleId) ? "Id1" : vehicleId);
+    game!.Start(success ? type : VehicleType.Plane, string.IsNullOrEmpty(vehicleId) ? "Id1" : vehicleId);
 
     Console.Write("Type 'yes' to start a new state machine game : ");
-    wannaStartGame = Console.ReadLine() == "yes";
-} while (wannaStartGame);
+    var userAnswer = Console.ReadLine();
+    userWhichesToContinue = userAnswer?.ToLower() == "yes" || userAnswer?.ToLower() == "y";
+} while (userWhichesToContinue);
 
 Console.WriteLine("Bye bye");

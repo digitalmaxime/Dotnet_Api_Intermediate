@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Stateless;
+using StateMachine.Application;
 using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
 using static System.Int32;
@@ -29,31 +30,26 @@ public class PlaneStateMachine : IVehicleStateMachine
     }
 
     public string Id { get; set; }
+    private readonly StateMachine<PlaneState, PlaneAction> _stateMachine;
     private int CurrentSpeed { get; set; }
     public int Altitude { get; set; }
     private PlaneState CurrentState { get; set; }
-    public string GetCurrentState => CurrentState.ToString();
-    private readonly StateMachine<PlaneState, PlaneAction> _stateMachine;
-    public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
+    public string GetCurrentState => GetState().ToString();
 
+    public IEnumerable<string> GetPermittedTriggers => _stateMachine
+        .GetPermittedTriggers()
+        .Select(x => x.ToString());
 
-    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _accelerateWithParam;
-    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _decelerateWithParam;
+    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int> _triggerWithSpeedParameter;
 
     public PlaneStateMachine(string id, IServiceScopeFactory serviceScopeFactory)
     {
         Id = id;
         _serviceScopeFactory = serviceScopeFactory;
-        _stateMachine = new StateMachine<PlaneState, PlaneAction>(
-            () => CurrentState,
-            (s) =>
-            {
-                CurrentState = s;
-                SaveState();
-            }
-        );
+        _stateMachine = new StateMachine<PlaneState, PlaneAction>(GetState, SaveState);
+
         InitializeStateMachine(id).GetAwaiter();
-        ConfigureStates();
+        PlaneStateMachineConfigurator.ConfigureStates(_stateMachine, _triggerWithSpeedParameter);
     }
 
     ~PlaneStateMachine()
@@ -63,6 +59,7 @@ public class PlaneStateMachine : IVehicleStateMachine
 
     private async Task InitializeStateMachine(string id)
     {
+        _triggerWithSpeedParameter = _stateMachine.SetTriggerParameters<int>(PlaneAction.Stop);
         using var scope = _serviceScopeFactory.CreateScope();
         var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
         var plane = planeStateRepository.GetById(id);
@@ -72,7 +69,7 @@ public class PlaneStateMachine : IVehicleStateMachine
             {
                 Id = id, Speed = 0, State = PlaneState.Stopped
             };
-            
+
             await planeStateRepository.Save(plane);
         }
 
@@ -80,64 +77,37 @@ public class PlaneStateMachine : IVehicleStateMachine
         CurrentSpeed = plane.Speed;
     }
     
-    private void ConfigureStates()
+    private PlaneState GetState()
     {
-        _accelerateWithParam = _stateMachine.SetTriggerParameters<int>(PlaneAction.Accelerate);
-        _decelerateWithParam = _stateMachine.SetTriggerParameters<int>(PlaneAction.Decelerate);
-
-        _stateMachine.Configure(PlaneState.Stopped)
-            .Permit(PlaneAction.Start, PlaneState.Started)
-            .OnEntry((state) =>
-            {
-                CurrentSpeed = 0;
-                PrintState(state);
-            })
-            .OnExit(PrintState);
-
-        _stateMachine.Configure(PlaneState.Started)
-            .Permit(PlaneAction.Accelerate, PlaneState.Running)
-            .Permit(PlaneAction.Stop, PlaneState.Stopped)
-            .OnEntry((state) =>
-            {
-                CurrentSpeed = 0;
-                PrintState(state);
-            })
-            .OnExit(PrintState);
-        _stateMachine.Configure(PlaneState.Running)
-            .OnEntryFrom(_accelerateWithParam, (speed, _) =>
-            {
-                CurrentSpeed = speed;
-                SaveState();
-                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
-            })
-            .PermitIf(PlaneAction.Stop, PlaneState.Stopped, () => CurrentSpeed == 0)
-            .PermitIf(PlaneAction.Fly, PlaneState.Flying, () => CurrentSpeed > 100)
-            .InternalTransition<int>(_accelerateWithParam, (speed, _) =>
-            {
-                CurrentSpeed = speed;
-                SaveState();
-                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
-            })
-            .InternalTransitionIf<int>(_decelerateWithParam, _ => CurrentSpeed > 0, (speed, _) =>
-            {
-                CurrentSpeed = speed;
-                Console.WriteLine($"\tSpeed is {CurrentSpeed}");
-            });
-
-        _stateMachine.Configure(PlaneState.Flying)
-            .Permit(PlaneAction.Land, PlaneState.Running);
+        using var scope = _serviceScopeFactory.CreateScope();
+        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
+        var planeEntity = planeStateRepository.GetById(Id);
+        return planeEntity?.State ?? PlaneState.Stopped;
     }
-
-    private void SaveState()
+    
+    private void SaveState(PlaneState state)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
         var plane = new PlaneEntity()
         {
-            Id = Id, Speed = CurrentSpeed, State = CurrentState
+            Id = Id, Speed = CurrentSpeed, State = state
         };
-        
+
         planeStateRepository.Save(plane);
+    }
+
+    private int UpdateSpeed(string planeId, int newSpeed)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
+        var planeEntity = planeStateRepository.GetById(planeId);
+        if(planeEntity == null) throw new ApplicationException("Plane not found");
+        planeEntity.Speed = newSpeed;
+
+        planeStateRepository.Save(planeEntity);
+        CurrentSpeed = newSpeed; // TODO: this duplicates the state, should be removed
+        return planeEntity.Speed;
     }
 
     public void TakeAction(string actionString)
@@ -147,7 +117,7 @@ public class PlaneStateMachine : IVehicleStateMachine
         switch (action)
         {
             case PlaneAction.Stop:
-                _stateMachine.Fire(PlaneAction.Stop);
+                _stateMachine.Fire(_triggerWithSpeedParameter, CurrentSpeed);
                 return;
 
             case PlaneAction.Start:
@@ -155,31 +125,37 @@ public class PlaneStateMachine : IVehicleStateMachine
                 return;
 
             case PlaneAction.Accelerate:
-                _stateMachine.Fire(_accelerateWithParam, CurrentSpeed + 35);
+                var updatedSpeed1 = UpdateSpeed(Id, CurrentSpeed + 35);
+                PlaneStateProcessor.Process(updatedSpeed1);
+                _stateMachine.Fire(PlaneAction.Accelerate);
                 return;
 
             case PlaneAction.Decelerate:
-                _stateMachine.Fire(_decelerateWithParam, Max(CurrentSpeed - 35, 0));
+                var updatedSpeed2 = UpdateSpeed(Id, Max(CurrentSpeed - 35, 0));
+                PlaneStateProcessor.Process(updatedSpeed2);
+                _stateMachine.Fire(PlaneAction.Decelerate);
                 return;
-            
+
             case PlaneAction.Fly:
-                _stateMachine.Fire(PlaneAction.Fly);
+                _stateMachine.Fire(_triggerWithSpeedParameter, CurrentSpeed);
                 return;
-            
+
             case PlaneAction.Land:
                 _stateMachine.Fire(PlaneAction.Land);
                 return;
-            
+
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action,
                     $"{nameof(PlaneStateMachine)} does not support {action}");
         }
     }
 
-    private static void PrintState(StateMachine<PlaneState, PlaneAction>.Transition state)
+    public static void PrintState(StateMachine<PlaneState, PlaneAction>.Transition state, bool isOnEntry = true)
     {
+        var onEntry = isOnEntry ? "OnEntry" : "OnExit";
         Console.WriteLine(
-            $"\tOnEntry/OnExit\n\tState Source : {state.Source}, " +
+            $"\n\t{onEntry}, " +
+            $"\n\tState Source : {state.Source}, " +
             $"State Trigger : {state.Trigger}, " +
             $"State destination : {state.Destination}");
     }

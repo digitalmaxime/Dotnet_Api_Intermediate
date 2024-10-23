@@ -21,10 +21,10 @@ public class Game
         do
         {
             Console.Write($"Current car {stateMachine.Id} at state : {stateMachine.GetCurrentState}\n" +
-                          $"\tChoices : {JsonSerializer.Serialize(stateMachine.GetPermittedTriggers)} or 'q' to quit : ");
+                          $"\tChoices : {JsonSerializer.Serialize(stateMachine.GetPermittedTriggers)} or 'exit' to exit : ");
 
             input = Console.ReadLine();
-            if (input == "q") break;
+            if (input == "exit") break;
             if (input == "" && stateMachine.GetPermittedTriggers.Contains("Start")) input = "Start";
 
             try
@@ -35,7 +35,7 @@ public class Game
             {
                 Console.WriteLine(e.Message);
             }
-        } while (input != "q");
+        } while (input != "exit");
 
         Console.WriteLine("Game ended");
     }
