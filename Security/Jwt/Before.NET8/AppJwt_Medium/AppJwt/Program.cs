@@ -36,13 +36,15 @@ Console.WriteLine($"Title: {positionOptions.Title} \n" +
                   $"Name: {positionOptions.Name}");
 
 positionOptions = builder.Configuration.GetSection(PositionOptions.Position)
+    .Get<PositionOptions>();positionOptions = builder.Configuration.GetSection(PositionOptions.Position)
     .Get<PositionOptions>();
 
 Console.WriteLine($"Title: {positionOptions.Title} \n" +
                   $"Name: {positionOptions.Name}");
 */
-
-builder.Services.Configure<PositionOptions>(
+var positionOptions = builder.Configuration.GetSection(PositionOptions.Position)
+    .Get<PositionOptions>();
+var toto = builder.Services.Configure<PositionOptions>(
     builder.Configuration.GetSection(PositionOptions.Position));
 
 builder.Services
@@ -64,7 +66,7 @@ builder.Services
             )
         };
     });
-    
+
 
 var app = builder.Build();
 
