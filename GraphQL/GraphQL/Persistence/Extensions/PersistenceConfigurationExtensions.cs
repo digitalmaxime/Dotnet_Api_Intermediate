@@ -23,6 +23,7 @@ public static class PersistenceConfigurationExtensions
             // all good
             System.Console.WriteLine("All good");
         }
+        
         context.Database.Migrate();
     }
 }

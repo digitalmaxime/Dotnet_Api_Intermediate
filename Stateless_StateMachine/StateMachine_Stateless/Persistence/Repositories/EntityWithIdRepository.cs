@@ -15,19 +15,11 @@ public class EntityWithIdRepository<T> : IEntityWithIdRepository<T> where T : En
 
     public async Task Save(T entity)
     {
-        var id = entity.Id;
         var vehicleEntity =
-            await _dbContext.Set<T>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-
-        if (vehicleEntity == null)
-        {
-            await _dbContext.Set<T>().AddAsync(entity);
-        }
-        else
-        {
-            _dbContext.Set<T>().Update(entity);
-        }
-
+            await _dbContext.Set<T>().FirstOrDefaultAsync(x => x.Id == entity.Id);
+            // _dbContext.Set<T>().Update(entity);
+            _dbContext.Entry(vehicleEntity ?? throw new InvalidOperationException())
+                .CurrentValues.SetValues(entity);
         await _dbContext.SaveChangesAsync();
     }
 

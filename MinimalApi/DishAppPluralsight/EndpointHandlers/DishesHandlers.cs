@@ -23,9 +23,7 @@ public static class DishesHandlers
     }
 
     public static async Task<Results<NotFound, Ok<DishDto>>> GetDishByIdAsync(
-        [FromServices] DishesDbContext dishesDbContext,
-        IMapper mapper,
-        Guid dishId)
+        [FromServices] DishesDbContext dishesDbContext, IMapper mapper, Guid dishId)
     {
         var dish = await dishesDbContext.Dishes.FirstOrDefaultAsync(d => d.Id == dishId);
         if (dish == null) return TypedResults.NotFound();

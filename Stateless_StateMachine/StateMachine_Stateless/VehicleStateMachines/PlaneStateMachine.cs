@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Stateless;
+using Stateless.Reflection;
 using StateMachine.Application;
 using StateMachine.Persistence.Contracts;
 using StateMachine.Persistence.Domain;
@@ -7,49 +8,24 @@ using static System.Int32;
 
 namespace StateMachine.VehicleStateMachines;
 
-public class PlaneStateMachine : IVehicleStateMachine
+public partial class PlaneStateMachine : IPlaneStateMachine
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IPlaneStateProcessor _planeStateProcessor;
+    // private readonly IPlaneStateRepository _planeStateRepository;
 
-    public enum PlaneState
-    {
-        Stopped,
-        Started,
-        Running,
-        Flying,
-    }
+    private StateMachine<PlaneState, PlaneAction>? _stateMachine;
+    public string GetCurrentState => _stateMachine?.State.ToString() ?? "Not configured";
 
-    public enum PlaneAction
-    {
-        Stop,
-        Start,
-        Accelerate,
-        Decelerate,
-        Fly,
-        Land
-    }
-
-    public string Id { get; set; }
-    private readonly StateMachine<PlaneState, PlaneAction> _stateMachine;
-    private int CurrentSpeed { get; set; }
-    public int Altitude { get; set; }
-    private PlaneState CurrentState { get; set; }
-    public string GetCurrentState => GetState().ToString();
-
-    public IEnumerable<string> GetPermittedTriggers => _stateMachine
-        .GetPermittedTriggers()
+    public IEnumerable<string>? GetPermittedTriggers => _stateMachine?.GetPermittedTriggers()
         .Select(x => x.ToString());
 
-    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int> _triggerWithSpeedParameter;
+    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _stopTriggerWithSpeedParameter;
+    private StateMachine<PlaneState, PlaneAction>.TriggerWithParameters<int>? _flyTriggerWithSpeedParameter;
 
-    public PlaneStateMachine(string id, IServiceScopeFactory serviceScopeFactory)
+    public PlaneStateMachine(IPlaneStateProcessor planeStateProcessor, IPlaneStateRepository planeStateRepository)
     {
-        Id = id;
-        _serviceScopeFactory = serviceScopeFactory;
-        _stateMachine = new StateMachine<PlaneState, PlaneAction>(GetState, SaveState);
-
-        InitializeStateMachine(id).GetAwaiter();
-        PlaneStateMachineConfigurator.ConfigureStates(_stateMachine, _triggerWithSpeedParameter);
+        _planeStateProcessor = planeStateProcessor;
+        // _planeStateRepository = planeStateRepository;
     }
 
     ~PlaneStateMachine()
@@ -57,91 +33,66 @@ public class PlaneStateMachine : IVehicleStateMachine
         Console.WriteLine("~PlaneStateMachine xox");
     }
 
-    private async Task InitializeStateMachine(string id)
+    public void ConfigureStateMachine(string vehicleId)
     {
-        _triggerWithSpeedParameter = _stateMachine.SetTriggerParameters<int>(PlaneAction.Stop);
-        using var scope = _serviceScopeFactory.CreateScope();
-        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
-        var plane = planeStateRepository.GetById(id);
-        if (plane == null)
-        {
-            plane = new PlaneEntity()
-            {
-                Id = id, Speed = 0, State = PlaneState.Stopped
-            };
-
-            await planeStateRepository.Save(plane);
-        }
-
-        CurrentState = plane.State;
-        CurrentSpeed = plane.Speed;
+        _stateMachine = new StateMachine<PlaneState, PlaneAction>(
+            () => _planeStateProcessor.GetState(vehicleId),
+            (planeState) => _planeStateProcessor.SaveState(vehicleId, planeState));
+        _stopTriggerWithSpeedParameter = _stateMachine.SetTriggerParameters<int>(PlaneAction.Stop);
+        _flyTriggerWithSpeedParameter = _stateMachine.SetTriggerParameters<int>(PlaneAction.Fly);
+        PlaneStateMachineConfigurator.ConfigureStates(_stateMachine, _stopTriggerWithSpeedParameter, _flyTriggerWithSpeedParameter);
     }
+
+    // private PlaneState GetState(string planeId)
+    // {
+    //     var planeEntity = _planeStateRepository.GetById(planeId);
+    //     return planeEntity?.State ?? PlaneState.Stopped;
+    // }
+    //
+    // private void SaveState(string planeId, PlaneState state)
+    // {
+    //     var plane = _planeStateRepository.GetById(planeId);
+    //
+    //     if (plane == null) return;
+    //
+    //     plane.State = state;
+    //
+    //     _planeStateRepository.Save(plane);
+    // }
     
-    private PlaneState GetState()
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
-        var planeEntity = planeStateRepository.GetById(Id);
-        return planeEntity?.State ?? PlaneState.Stopped;
-    }
-    
-    private void SaveState(PlaneState state)
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
-        var plane = new PlaneEntity()
-        {
-            Id = Id, Speed = CurrentSpeed, State = state
-        };
-
-        planeStateRepository.Save(plane);
-    }
-
-    private int UpdateSpeed(string planeId, int newSpeed)
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var planeStateRepository = scope.ServiceProvider.GetRequiredService<IPlaneStateRepository>();
-        var planeEntity = planeStateRepository.GetById(planeId);
-        if(planeEntity == null) throw new ApplicationException("Plane not found");
-        planeEntity.Speed = newSpeed;
-
-        planeStateRepository.Save(planeEntity);
-        CurrentSpeed = newSpeed; // TODO: this duplicates the state, should be removed
-        return planeEntity.Speed;
-    }
-
-    public void TakeAction(string actionString)
+    public void TakeAction(string vehicleId, string actionString)
     {
         Enum.TryParse<PlaneAction>(actionString, out var action);
+        var speed = _planeStateProcessor.GetSpeed(vehicleId);
 
         switch (action)
         {
             case PlaneAction.Stop:
-                _stateMachine.Fire(_triggerWithSpeedParameter, CurrentSpeed);
+                _stateMachine?.Fire(_stopTriggerWithSpeedParameter, speed);
                 return;
 
             case PlaneAction.Start:
-                _stateMachine.Fire(PlaneAction.Start);
+                _stateMachine?.Fire(PlaneAction.Start);
                 return;
 
             case PlaneAction.Accelerate:
-                var updatedSpeed1 = UpdateSpeed(Id, CurrentSpeed + 35);
+                var updatedSpeed1 = _planeStateProcessor.UpdateSpeed(vehicleId, speed + 35);
                 PlaneStateProcessor.Process(updatedSpeed1);
-                _stateMachine.Fire(PlaneAction.Accelerate);
+                _stateMachine?.Fire(PlaneAction.Accelerate);
                 return;
 
             case PlaneAction.Decelerate:
-                var updatedSpeed2 = UpdateSpeed(Id, Max(CurrentSpeed - 35, 0));
+                var updatedSpeed2 = _planeStateProcessor.UpdateSpeed(vehicleId, Max(speed - 35, 0));
                 PlaneStateProcessor.Process(updatedSpeed2);
-                _stateMachine.Fire(PlaneAction.Decelerate);
+                _stateMachine?.Fire(PlaneAction.Decelerate);
                 return;
 
             case PlaneAction.Fly:
-                _stateMachine.Fire(_triggerWithSpeedParameter, CurrentSpeed);
+                _stateMachine?.Fire(_flyTriggerWithSpeedParameter, speed);
                 return;
 
             case PlaneAction.Land:
-                _stateMachine.Fire(PlaneAction.Land);
+                _stateMachine?.Fire(PlaneAction.Land);
                 return;
 
             default:
@@ -159,4 +110,12 @@ public class PlaneStateMachine : IVehicleStateMachine
             $"State Trigger : {state.Trigger}, " +
             $"State destination : {state.Destination}");
     }
+}
+
+public interface IPlaneStateMachine
+{
+    IEnumerable<string>? GetPermittedTriggers { get; }
+    string GetCurrentState { get; }
+    void TakeAction(string vehicleId, string actionString);
+    void ConfigureStateMachine(string vehicleId);
 }

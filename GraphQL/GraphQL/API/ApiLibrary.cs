@@ -1,6 +1,6 @@
 namespace GraphQL.API;
 
-public sealed class ApiLibrary
+internal sealed class ApiLibrary
 {
     
 }

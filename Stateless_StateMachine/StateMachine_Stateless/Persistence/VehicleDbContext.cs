@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using StateMachine.Persistence.Domain;
 using StateMachine.VehicleStateMachines;
 
@@ -8,12 +9,13 @@ public class VehicleDbContext : DbContext
 {
     public VehicleDbContext(DbContextOptions<VehicleDbContext> options) : base(options)
     {
-        
     }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseInMemoryDatabase("VehicleState");
         optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Name }, LogLevel.Information);
         base.OnConfiguring(optionsBuilder);
     }
 
@@ -21,22 +23,22 @@ public class VehicleDbContext : DbContext
     {
         modelBuilder.Entity<CarEntity>()
             .HasKey(x => x.Id);
-        
+
         modelBuilder.Entity<PlaneEntity>()
             .HasKey(x => x.Id);
 
-        modelBuilder.Entity<CarEntity>()
-            .HasData(new CarEntity()
+        modelBuilder.Entity<PlaneEntity>()
+            .HasData(new PlaneEntity()
                 {
                     Id = "Id1",
                     Speed = 0,
-                    State = CarStateMachine.CarState.Stopped
+                    State = PlaneStateMachine.PlaneState.Stopped
                 },
-                new CarEntity()
+                new PlaneEntity()
                 {
                     Id = "Id2",
                     Speed = 0,
-                    State = CarStateMachine.CarState.Stopped
+                    State = PlaneStateMachine.PlaneState.Stopped
                 });
 
         base.OnModelCreating(modelBuilder);

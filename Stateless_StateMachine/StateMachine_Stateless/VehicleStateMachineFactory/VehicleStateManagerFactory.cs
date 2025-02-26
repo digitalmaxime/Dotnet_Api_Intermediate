@@ -4,15 +4,17 @@ using StateMachine.VehicleStateMachines;
 
 namespace StateMachine.VehicleStateMachineFactory;
 
-public class VehicleFactory : IVehicleFactory
+public class VehicleFactory // TODO: Adjust : IVehicleFactory
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IPlaneStateMachine _planeStateMachine;
     private readonly Dictionary<string, CarStateMachine> _carStateMachineDictionary = new();
     private readonly Dictionary<string, PlaneStateMachine> _planeStateMachineDictionary = new();
 
-    public VehicleFactory(IServiceScopeFactory serviceScopeFactory)
+    public VehicleFactory(IServiceScopeFactory serviceScopeFactory, IPlaneStateMachine planeStateMachine)
     {
         _serviceScopeFactory = serviceScopeFactory;
+        _planeStateMachine = planeStateMachine;
     }
 
     private CarStateMachine GetOrAddCarStateMachine(string id)
@@ -27,25 +29,25 @@ public class VehicleFactory : IVehicleFactory
         return stateMachine!;
     }
 
-    private PlaneStateMachine GetOrAddPlaneStateMachine(string id)
+    public IPlaneStateMachine GetOrAddPlaneStateMachine(string id)
     {
-        var success = _planeStateMachineDictionary.TryGetValue(id, out var stateMachine);
-        if (!success)
-        {
-            stateMachine = new PlaneStateMachine(id, _serviceScopeFactory);
-            _planeStateMachineDictionary.Add(id, stateMachine);
-        }
+        // var success = _planeStateMachineDictionary.TryGetValue(id, out var stateMachine);
+        // if (!success)
+        // {
+        //     stateMachine = new PlaneStateMachine(_serviceScopeFactory);
+        //     _planeStateMachineDictionary.Add(id, stateMachine);
+        // }
 
-        return stateMachine!;
+        return _planeStateMachine;
     }
 
-    public IVehicleStateMachine CreateVehicleStateMachine(VehicleType type, string vehicleId)
-    {
-        return type switch
-        {
-            VehicleType.Car => GetOrAddCarStateMachine(vehicleId),
-            VehicleType.Plane => GetOrAddPlaneStateMachine(vehicleId),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-    }
+    // public IVehicleStateMachine CreateVehicleStateMachine(VehicleType type, string vehicleId)
+    // {
+    //     return type switch
+    //     {
+    //         VehicleType.Car => GetOrAddCarStateMachine(vehicleId),
+    //         VehicleType.Plane => GetOrAddPlaneStateMachine(vehicleId),
+    //         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+    //     };
+    // }
 }

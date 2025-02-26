@@ -15,9 +15,7 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development
     builder.Services.EnsureDatabaseCreated();
 }
 
-
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,6 +1,0 @@
-@AuthorizationHandler_HostAddress = http://localhost:5128
-
-GET {{AuthorizationHandler_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

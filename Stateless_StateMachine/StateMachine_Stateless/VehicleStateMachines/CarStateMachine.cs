@@ -33,7 +33,7 @@ public class CarStateMachine : IVehicleStateMachine
     private CarState CurrentState { get; set; }
     public string GetCurrentState => CurrentState.ToString();
     private readonly StateMachine<CarState, CarAction> _stateMachine;
-    public IEnumerable<string> GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
+    public IEnumerable<string>? GetPermittedTriggers => _stateMachine.GetPermittedTriggers().Select(x => x.ToString());
 
 
     private StateMachine<CarState, CarAction>.TriggerWithParameters<int>? _accelerateWithParam;
@@ -165,6 +165,16 @@ public class CarStateMachine : IVehicleStateMachine
         }
     }
 
+    public void TakeAction(string vehicleId, string actionString)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ConfigureStateMachine(string vehicleId)
+    {
+        throw new NotImplementedException();
+    }
+    
     private static void PrintState(StateMachine<CarState, CarAction>.Transition state)
     {
         Console.WriteLine(
