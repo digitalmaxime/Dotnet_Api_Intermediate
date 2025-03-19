@@ -7,3 +7,6 @@ Migrations/
 .vscode/
 */cache/
 .DS_Store
+wwwroot/
+node_modules
+bower_components    
