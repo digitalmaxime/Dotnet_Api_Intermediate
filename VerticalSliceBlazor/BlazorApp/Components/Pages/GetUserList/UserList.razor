@@ -1,0 +1,72 @@
+@page "/users"
+@using Application.Features.GetUserList
+@inject MediatR.IMediator mediator
+@rendermode InteractiveServer
+
+<h3>User List</h3>
+
+@if (_model == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table mb-0 table-bordered  table-hover table-striped small">
+            <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in _model.Users)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <p role="status">Page: @_currentPage of @_model.TotalPages</p>
+        <button class="btn btn-primary" @onclick="PreviousPage">Previous Page</button>
+        <button class="btn btn-primary" @onclick="NextPage">Next Page</button>
+
+    </div>
+}
+
+@code {
+    private GetUserListViewModel? _model;
+    private int _currentPage = 1;
+    private const int PageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await OnGetAsync();
+    }
+
+    private async Task OnGetAsync()
+    {
+        var getUserList = await mediator.Send(new GetUserListQuery());
+        var usersViewModel = getUserList.Users.Select(u => new UserViewModel { Name = u.Name }).ToArray();
+        _model = new GetUserListViewModel(usersViewModel, getUserList.TotalNumberOfUsers, getUserList.PageSize, getUserList.Page);
+    }
+
+    private async Task PreviousPage()
+    {
+        if (_currentPage > 0) _currentPage--;
+        var getUserList = await mediator.Send(new GetUserListQuery(PageSize, _currentPage));
+        var usersViewModel = getUserList.Users.Select(u => new UserViewModel { Name = u.Name }).ToArray();
+        _model = new GetUserListViewModel(usersViewModel, getUserList.TotalNumberOfUsers, getUserList.PageSize, getUserList.Page);
+    }
+
+    private async Task NextPage()
+    {
+        _currentPage++;
+        var getUserList = await mediator.Send(new GetUserListQuery(PageSize, _currentPage));
+        var usersViewModel = getUserList.Users.Select(u => new UserViewModel { Name = u.Name }).ToArray();
+        _model = new GetUserListViewModel(usersViewModel, getUserList.TotalNumberOfUsers, getUserList.PageSize, getUserList.Page);
+    }
+
+}
