@@ -1,0 +1,31 @@
+@KafkaFlowDemo_HostAddress = https://localhost:7104
+
+GET {{KafkaFlowDemo_HostAddress}}/api/todos/
+Accept: application/json
+###
+DELETE /api/todos/
+Accept: application/json
+
+### add todo 1
+POST {{KafkaFlowDemo_HostAddress}}/api/todos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Id": 1,
+  "Title": "Title1",
+    "Description": "Description1",
+  "DueDate": "2021-12-01"
+}
+
+### add random todo
+POST {{KafkaFlowDemo_HostAddress}}/api/todos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Id": 33,
+  "Title": "Title2",
+  "Description": "Description2",
+  "DueDate": "2025-12-02"
+}
