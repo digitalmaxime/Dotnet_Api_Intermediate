@@ -1,9 +1,12 @@
-﻿using KafkaFlow;
+﻿using System.Text.Json;
+using KafkaFlow;
 using KafkaFlow.Middlewares.Serializer.Resolvers;
 using KafkaFlow.Serializer;
 using KafkaFlowConsumer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Models;
+using static System.Text.Json.JsonSerializer;
 
 var services = new ServiceCollection();
 services.AddSingleton<MyMessageTypeResolver>(); // Or AddTransient or AddScoped, depending on your needs
@@ -21,18 +24,15 @@ services.AddKafka(kafka => kafka
             .WithWorkersCount(2)
             .WithAutoOffsetReset(AutoOffsetReset.Latest)
             .AddMiddlewares(middlewares => middlewares
-                // .AddDeserializer<JsonCoreDeserializer>()
-                .AddDeserializer<JsonCoreDeserializer, MyMessageTypeResolver>(
-                    resolver => new JsonCoreDeserializer(),
-                    resolverFactory: r => r.Resolve<MyMessageTypeResolver>()
-                )
+                .AddDeserializer<JsonCoreDeserializer, MyMessageTypeResolver>()
                 .AddTypedHandlers(h => h
                     .AddHandler<HelloMessageHandler>()
-                    .WhenNoHandlerFound(context => 
-                             Console.WriteLine("Message not handled > Partition: {0} | Offset: {1}",
-                                 context.ConsumerContext.Partition,
-                                 context.ConsumerContext.Offset)
-                         )
+                    .AddHandler<GoodByeMessageHandler>()
+                    .WhenNoHandlerFound(context =>
+                        Console.WriteLine("Message not handled > Partition: {0} | Offset: {1}",
+                            context.ConsumerContext.Partition,
+                            context.ConsumerContext.Offset)
+                    )
                 )
             )
         )
@@ -40,31 +40,38 @@ services.AddKafka(kafka => kafka
 );
 
 var serviceProvider = services.BuildServiceProvider();
-
 var bus = serviceProvider.CreateKafkaBus();
-
 await bus.StartAsync();
-
 Console.WriteLine("press any key to exit");
 Console.ReadKey();
 await bus.StopAsync();
 
-public class MyMessageTypeResolver : IMessageTypeResolver
+
+internal class MyMessageTypeResolver(
+    ILogger<MyMessageTypeResolver> logger
+) : IMessageTypeResolver
 {
-    public async ValueTask<Type> OnConsumeAsync(IMessageContext context)
+    public ValueTask<Type> OnConsumeAsync(IMessageContext context)
     {
-        var headerType = context.Headers.GetString("eventTYpe"?.ToLower());
-        var res = headerType switch
+        var messageTypeHeader = context.Headers.GetString("message-type");
+
+        return messageTypeHeader switch
         {
-            "HelloMessage" => typeof(HelloMessage),
-            _ => typeof(HelloMessage)
+            MessageTypes.HelloMessage => new ValueTask<Type>(typeof(HelloMessage)),
+            MessageTypes.GoodbyeMessage => new ValueTask<Type>(typeof(GoodByeMessage)),
+            _ => throw new InvalidOperationException($"Unknown message type: {messageTypeHeader}")
         };
 
-        return res;
     }
 
-    public async ValueTask OnProduceAsync(IMessageContext context)
+    public ValueTask OnProduceAsync(IMessageContext context)
     {
-        await ValueTask.CompletedTask;
+        return ValueTask.CompletedTask;
     }
+}
+
+public static class MessageTypes
+{
+    public const string HelloMessage = "hello-message";
+    public const string GoodbyeMessage = "goodbye-message";
 }

@@ -2,12 +2,12 @@ using KafkaFlow;
 
 namespace KafkaFlowConsumer;
 
-public class HelloMessageHandler : IMessageHandler<HelloMessage>
+public class GoodByeMessageHandler : IMessageHandler<GoodByeMessage>
 {
-    public Task Handle(IMessageContext context, HelloMessage message)
+    public Task Handle(IMessageContext context, GoodByeMessage message)
     {
         Console.WriteLine(
-            "Hello!\n" +
+            "Good bye!\n" +
             "Partition: {0} | Offset: {1} | Message: {2}",
             context.ConsumerContext.Partition,
             context.ConsumerContext.Offset,
@@ -17,7 +17,7 @@ public class HelloMessageHandler : IMessageHandler<HelloMessage>
     }
 }
 
-public class HelloMessage
+public class GoodByeMessage
 {
     public string Text { get; set; } = default!;
 }
