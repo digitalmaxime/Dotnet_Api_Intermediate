@@ -1,5 +1,5 @@
-using KafkaFlowDemo.Endpoints;
-using KafkaFlowDemo.Persistence;
+using KafkaFlowProducer.Endpoints;
+using KafkaFlowProducer.Persistence;
 using KafkaFlow;
 using KafkaFlow.Serializer;
 
@@ -9,19 +9,19 @@ builder.Services.AddKafka(kafka => kafka.AddCluster(cluster =>
 {
     const string topicName = "todos";
     cluster
-        .WithBrokers(new[] { "localhost:9092" })
+        .WithBrokers(["localhost:9092"])
         .CreateTopicIfNotExists(topicName, 1, 1)
         .AddProducer("publish-todo-producer",
             producer => producer
                 .DefaultTopic(topicName)
                 .AddMiddlewares(middlewares =>
-                    // middlewares.AddSerializer<CustomJsonSerializer>()
                     middlewares.AddSerializer<JsonCoreSerializer>()
                 )
         );
 }));
 
 builder.Services.AddOpenApi();
+
 builder.Services.AddSqlite<TodoDbContext>("Data Source=todos.db");
 
 var app = builder.Build();

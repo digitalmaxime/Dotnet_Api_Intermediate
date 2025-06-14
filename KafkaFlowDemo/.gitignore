@@ -1,0 +1,69 @@
+
+# Ignore build output directory (bin and obj folders)
+**/bin/
+**/obj/
+
+# Ignore Rider project files
+.idea/
+.idea_modules/
+
+# Ignore user-specific Rider settings
+*.sln.iml
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Visual Studio specific files
+*.user
+*.suo
+*.vcxproj.user
+*.pdb
+*.opendb
+*.vcxproj.filters
+.vs/
+
+# Ignore compiled files
+*.dll
+*.exe
+*.so
+*.dylib
+
+# Ignore coverage reports
+*.coverage
+*.coveragexml
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.sln.docstates
+
+# Ignore published output
+publish/
+
+# Ignore configuration files
+appsettings*.json
+
+# Ignore NuGet packages
+*.nupkg
+*.snupkg
+/packages/
+.nuget
+project.lock.json
+
+# Ignore extensions
+*.~uo
+*.orig
+
+# Ignore ReSharper files
+_ReSharper.*
+*_ReSharper*/
+
+# Ignore MacOS system files
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes

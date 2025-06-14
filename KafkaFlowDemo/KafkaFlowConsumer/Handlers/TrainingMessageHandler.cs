@@ -1,23 +1,19 @@
 using KafkaFlow;
+using Models;
 
 namespace KafkaFlowConsumer;
 
-public class HelloMessageHandler : IMessageHandler<HelloMessage>
+public class TrainingMessageHandler : IMessageHandler<TrainingTodoEvent>
 {
-    public Task Handle(IMessageContext context, HelloMessage message)
+    public Task Handle(IMessageContext context, TrainingTodoEvent message)
     {
         Console.WriteLine(
-            "Hello!\n" +
+            "Training Todo Event\n" +
             "Partition: {0} | Offset: {1} | Message: {2}",
             context.ConsumerContext.Partition,
             context.ConsumerContext.Offset,
-            message.Text);
+            message.Description);
 
         return Task.CompletedTask;
     }
-}
-
-public class HelloMessage
-{
-    public string Text { get; set; } = default!;
 }

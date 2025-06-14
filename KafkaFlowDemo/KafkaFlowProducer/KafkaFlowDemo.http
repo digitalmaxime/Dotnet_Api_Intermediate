@@ -1,13 +1,13 @@
-@KafkaFlowDemo_HostAddress = https://localhost:7104
+@KafkaFlowProducer_HostAddress = https://localhost:7104
 
-GET {{KafkaFlowDemo_HostAddress}}/api/todos/
+GET {{KafkaFlowProducer_HostAddress}}/api/todos/
 Accept: application/json
 ###
 DELETE /api/todos/
 Accept: application/json
 
 ### add todo 1
-POST {{KafkaFlowDemo_HostAddress}}/api/todos
+POST {{KafkaFlowProducer_HostAddress}}/api/todos
 Content-Type: application/json
 Accept: application/json
 
@@ -18,14 +18,24 @@ Accept: application/json
   "DueDate": "2021-12-01"
 }
 
-### add random todo
-POST {{KafkaFlowDemo_HostAddress}}/api/todos
+### add random work todo
+POST {{KafkaFlowProducer_HostAddress}}/api/todos/work
 Content-Type: application/json
 Accept: application/json
 
 {
-  "Id": 33,
-  "Title": "Title2",
-  "Description": "Description2",
+  "Title": "Title Work",
+  "Description": "Work your but off",
+  "DueDate": "2025-12-02"
+}
+
+### add random training todo
+POST {{KafkaFlowProducer_HostAddress}}/api/todos/training
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Title": "Title Training",
+  "Description": "Training your brain!",
   "DueDate": "2025-12-02"
 }

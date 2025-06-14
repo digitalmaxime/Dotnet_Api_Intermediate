@@ -2,15 +2,15 @@
 
 ## Description
 
-This project is a simple example of how to use kafka flow to create a pipeline of data processing.
+This project is a simple example of how to use kafka flow to create work and training todos.
 
 KafkaFlowDemo project is a MinimalApi which produces events
 
 ## How to run
-asdf
 
-## How to test
-adf
+Spin up the kafka docker containers through docker-compose
+
+dotnet run the producer and consumer
 
 dependencies : 
 - KafkaFlow nuget package

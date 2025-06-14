@@ -1,9 +1,11 @@
-using Confluent.Kafka;
+using System.Collections;
+using KafkaFlow;
 using KafkaFlow.Producers;
-using KafkaFlowDemo.Persistence;
-using Microsoft.AspNetCore.Mvc;
+using KafkaFlowProducer.Entities;
+using KafkaFlowProducer.Persistence;
+using Models;
 
-namespace KafkaFlowDemo.Endpoints;
+namespace KafkaFlowProducer.Endpoints;
 
 public static class TodoEndpoints
 {
@@ -13,30 +15,47 @@ public static class TodoEndpoints
             .WithDescription("A group of endpoints to manage todos")
             .WithTags("todos");
 
-        group.MapPost("", async (Todo todo, IProducerAccessor producerAccessor, TodoDbContext context) =>
+        group.MapPost("work", async (Todo todo, IProducerAccessor producerAccessor, TodoDbContext context) =>
         {
             context.Todos.Add(todo);
             await context.SaveChangesAsync();
             var producer = producerAccessor.GetProducer("publish-todo-producer");
-            // var headers = new Headers
-            // {
-            //     new Header("headerKey", []),
-            // };
-            // var message = new Message<string, Todo>()
-            // {
-            //     Headers = headers,
-            //     Key = "messageKey",
-            //     Value = todo,
-            //     Timestamp = new Timestamp(DateTimeOffset.UtcNow)
-            // };
-            await producer.ProduceAsync("key", todo);
+            var headers = new MessageHeaders
+            {
+                {
+                    Constants.MessageHeader.Key,
+                    System.Text.Encoding.UTF8.GetBytes(Constants.MessageHeader.WorkTodoValue)
+                }
+            };
+            var messageValue = new WorkTodoEvent()
+            {
+                Description = todo.Description
+            };
+            await producer.ProduceAsync(Constants.TopicName, "messageKey", messageValue, headers);
             return Results.Created($"/api/todos/{todo.Id}", todo);
         });
         
-        group.MapGet("", (TodoDbContext context) =>
+        group.MapPost("training", async (Todo todo, IProducerAccessor producerAccessor, TodoDbContext context) =>
         {
-            return Results.Ok(context.Todos.ToList());
+            context.Todos.Add(todo);
+            await context.SaveChangesAsync();
+            var producer = producerAccessor.GetProducer("publish-todo-producer");
+            var headers = new MessageHeaders
+            {
+                {
+                    Constants.MessageHeader.Key,
+                    System.Text.Encoding.UTF8.GetBytes(Constants.MessageHeader.TrainingTodoValue)
+                }
+            };
+            var messageValue = new TrainingTodoEvent()
+            {
+                Description = todo.Description
+            };
+            await producer.ProduceAsync(Constants.TopicName, "messageKey", messageValue, headers);
+            return Results.Created($"/api/todos/{todo.Id}", todo);
         });
+
+        group.MapGet("", (TodoDbContext context) => { return Results.Ok(context.Todos.ToList()); });
 
         group.MapDelete("", (TodoDbContext context) =>
         {
@@ -44,5 +63,4 @@ public static class TodoEndpoints
             return Results.NoContent();
         });
     }
-    
 }

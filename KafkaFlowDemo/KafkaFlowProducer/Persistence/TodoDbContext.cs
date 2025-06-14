@@ -1,7 +1,8 @@
-using KafkaFlowDemo.Endpoints;
+using KafkaFlowProducer.Endpoints;
+using KafkaFlowProducer.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace KafkaFlowDemo.Persistence;
+namespace KafkaFlowProducer.Persistence;
 
 public class TodoDbContext(DbContextOptions options) : DbContext(options)
 {
