@@ -1,6 +1,6 @@
 namespace Models;
 
-public interface TodoEvent
+public interface ITodoEvent
 {
     public string Description { get; set; }
 }

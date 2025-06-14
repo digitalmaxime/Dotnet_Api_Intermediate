@@ -1,6 +1,6 @@
 namespace Models;
 
-public class TrainingTodoEvent : TodoEvent
+public class TrainingTodoEvent : ITodoEvent
 {
     public required string Description { get; set; }
 }
