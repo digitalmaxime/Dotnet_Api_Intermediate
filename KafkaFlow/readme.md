@@ -6,6 +6,10 @@ This project is a simple example of how to use kafka flow to create work and tra
 
 KafkaFlowDemo project is a MinimalApi which produces events
 
+features:
+- Json Serializer
+- Multiple message (workTodo / trainingTodo) types in single topic
+
 ## How to run
 
 Spin up the kafka docker containers through docker-compose
