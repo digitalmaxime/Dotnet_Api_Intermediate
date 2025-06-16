@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "namespace": "Models",
+  "name": "WorkTodoEvent",
+  "doc": "Event representing a work-related todo item",
+  "fields": [
+    {
+      "name": "Description",
+      "type": "string",
+      "doc": "Description of the work todo item"
+    }
+  ]
+}

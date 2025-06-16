@@ -1,5 +1,4 @@
 ﻿using KafkaFlow;
-using KafkaFlow.Serializer;
 using KafkaFlowConsumer;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
@@ -13,24 +12,21 @@ services.AddKafka(kafka => kafka
     .AddCluster(cluster => cluster
         .WithBrokers(new[] { "localhost:9092" })
         .CreateTopicIfNotExists(Constants.TopicName, 1, 1)
-        .AddConsumer(consumer => consumer
-            .Topic(Constants.TopicName)
-            .WithGroupId("todo-consumer-group")
-            .WithBufferSize(100)
-            .WithWorkersCount(2)
-            .WithAutoOffsetReset(AutoOffsetReset.Latest)
-            .AddMiddlewares(middlewares => middlewares
-                .AddDeserializer<JsonCoreDeserializer, TodosMessageTypeResolver>()
-                .AddTypedHandlers(h => h
-                    .AddHandler<WorkTodoMessageHandler>()
-                    .AddHandler<TrainingMessageHandler>()
-                    .WhenNoHandlerFound(context =>
-                        Console.WriteLine("Message not handled > Partition: {0} | Offset: {1}",
-                            context.ConsumerContext.Partition,
-                            context.ConsumerContext.Offset)
-                    )
+        .AddConsumer(
+            consumer => consumer
+                .Topic(Constants.TopicName)
+                .WithGroupId("todo-consumer-group")
+                .WithBufferSize(100)
+                .WithWorkersCount(20)
+                .WithAutoOffsetReset(AutoOffsetReset.Latest)
+                .AddMiddlewares(
+                    middlewares => middlewares
+                        .AddSchemaRegistryAvroDeserializer()
+                        .AddTypedHandlers(
+                            handlers => handlers
+                                .AddHandler<WorkTodoMessageHandler>()
+                                .AddHandler<TrainingMessageHandler>())
                 )
-            )
         )
     )
 );
