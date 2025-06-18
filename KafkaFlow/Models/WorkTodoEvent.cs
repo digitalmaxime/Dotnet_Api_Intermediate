@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using Avro;
 using Avro.Specific;
 
@@ -51,7 +52,7 @@ public class WorkTodoEvent : ISpecificRecord
     }
 
 
-    // Initialize the Schema property with the proper Avro schema
+    [IgnoreDataMember] // This tells Avro to ignore this property when generating schema
     public Schema Schema => Schema.Parse(@"{
         ""type"": ""record"",
         ""name"": ""WorkTodoEvent"",
