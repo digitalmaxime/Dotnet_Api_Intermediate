@@ -1,10 +1,11 @@
-using System.Text.Json;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using KafkaFlowProducer.Endpoints;
 using KafkaFlowProducer.Persistence;
 using KafkaFlow;
+
 using Microsoft.Extensions.Options;
+using Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 var schemaRegistryConfig = builder.Configuration.GetSection("SchemaRegistry");
 
 builder.Services.Configure<SchemaRegistryConfig>(schemaRegistryConfig);
-
-// var schemaRegistryClient =
-//     new CachedSchemaRegistryClient(schemaRegistryConfig.Get<Dictionary<string, string>>());
 
 builder.Services.AddSingleton<ISchemaRegistryClient>(sp =>
 {
@@ -38,7 +36,6 @@ builder.Services.AddKafka(kafka => kafka.AddCluster(cluster =>
                         AutoRegisterSchemas = true,
                         NormalizeSchemas = true,
                         SubjectNameStrategy = SubjectNameStrategy.TopicRecord,
-                        
                     })
                 )
         );
