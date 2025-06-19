@@ -1,33 +1,33 @@
 ﻿using Confluent.SchemaRegistry;
 using KafkaFlow;
+using KafkaFlowConsumer;
 using KafkaFlowConsumer.Handlers;
+using Microsoft.Extensions.Options;
 using Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// var schemaRegistryConfig = builder.Configuration.GetSection("SchemaRegistry");
-//
-// builder.Services.Configure<SchemaRegistryConfig>(schemaRegistryConfig);
+var kafkaConfigurations = builder.Configuration
+    .GetSection(KafkaConfigurationOptions.SectionName)
+    .Get<KafkaConfigurationOptions>();
 
 builder.Services.AddSingleton<ISchemaRegistryClient>(_ =>
-    new CachedSchemaRegistryClient([new KeyValuePair<string, string>("Url", "http://localhost:8081")]));
+    new CachedSchemaRegistryClient(kafkaConfigurations!.SchemaRegistryConfig));
 
 var services = builder.Services;
 
 services.AddKafka(kafka => kafka
     .UseConsoleLog()
     .AddCluster(cluster => cluster
-        .WithBrokers(new[] { "localhost:9092" })
-        .WithSchemaRegistry(config => config.Url = "localhost:8081")
-        .WithSchemaRegistry(schemaRegistry =>
+        .WithBrokers([kafkaConfigurations!.BootstrapServer])
+        .WithSchemaRegistry(schemaRegistryConfiguration =>
         {
-            schemaRegistry.ValueSubjectNameStrategy = SubjectNameStrategy.TopicRecord;
-            schemaRegistry.Url = "http://localhost:8081";
+            schemaRegistryConfiguration.Url = kafkaConfigurations!.SchemaRegistryConfig.Url;
         })
         .AddConsumer(
             consumer => consumer
                 .Topic(Constants.TopicName)
-                .WithGroupId("todo-consumer-group")
+                .WithGroupId(kafkaConfigurations.ConsumerGroupId)
                 .WithBufferSize(100)
                 .WithWorkersCount(20)
                 .WithAutoOffsetReset(AutoOffsetReset.Latest)
@@ -39,7 +39,7 @@ services.AddKafka(kafka => kafka
                             .AddTypedHandlers(
                                 handlers => handlers
                                     .AddHandler<WorkTodoMessageHandler>()
-                                // .AddHandler<TrainingMessageHandler>()
+                                    .AddHandler<TrainingTodoMessageHandler>()
                             );
                     }
                 )
