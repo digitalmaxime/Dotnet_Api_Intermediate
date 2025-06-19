@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlowConsumer", "KafkaF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{5007BC50-A317-401F-A299-AB337B47F25C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaRegistration", "SchemaRegistration\SchemaRegistration.csproj", "{BA5CF7B6-5360-44B8-A1D3-60971ECA1891}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchemaRegistrationTask", "SchemaRegistrationTask\SchemaRegistrationTask.csproj", "{BA5CF7B6-5360-44B8-A1D3-60971ECA1891}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

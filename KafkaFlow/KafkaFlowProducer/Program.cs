@@ -1,11 +1,9 @@
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using KafkaFlow;
+using Microsoft.Extensions.Options;
 using KafkaFlowProducer.Endpoints;
 using KafkaFlowProducer.Persistence;
-using KafkaFlow;
-
-using Microsoft.Extensions.Options;
-using Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,8 +32,8 @@ builder.Services.AddKafka(kafka => kafka.AddCluster(cluster =>
                     middlewares.AddSchemaRegistryAvroSerializer(new AvroSerializerConfig()
                     {
                         AutoRegisterSchemas = true,
-                        NormalizeSchemas = true,
-                        SubjectNameStrategy = SubjectNameStrategy.TopicRecord,
+                        NormalizeSchemas = false,
+                        SubjectNameStrategy = SubjectNameStrategy.Topic,
                     })
                 )
         );

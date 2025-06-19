@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.10.0" />
         <PackageReference Include="KafkaFlow" Version="4.0.0" />
         <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="4.0.0" />
         <PackageReference Include="KafkaFlow.Serializer.SchemaRegistry.ConfluentAvro" Version="4.0.0" />

@@ -4,13 +4,11 @@ using System.Runtime.Serialization;
 using Avro;
 using Avro.Specific;
 
-
 namespace Models;
 
 public class WorkTodoEvent : ISpecificRecord
-
 {
-    [Required] public required string Description { get; set; }
+    [Required] public required string Description { get; set; } = "default description";
 
     public string? Note { get; set; }
 
@@ -53,15 +51,6 @@ public class WorkTodoEvent : ISpecificRecord
 
 
     [IgnoreDataMember] // This tells Avro to ignore this property when generating schema
-    public Schema Schema => Schema.Parse(@"{
-        ""type"": ""record"",
-        ""name"": ""WorkTodoEvent"",
-        ""namespace"": ""Models"",
-        ""fields"": [
-            { ""name"": ""Description"", ""type"": ""string"" },
-            { ""name"": ""Note"", ""type"": [""null"", ""string""], ""default"": null },
-            { ""name"": ""Note2"", ""type"": [""null"", ""string""], ""default"": """" },
-            { ""name"": ""Note3"", ""type"": [""null"", ""string""], ""default"": """" }
-        ]
-    }");
+    public Schema Schema => SchemaGenerator.GenerateAvroSchema<WorkTodoEvent>();
+
 }

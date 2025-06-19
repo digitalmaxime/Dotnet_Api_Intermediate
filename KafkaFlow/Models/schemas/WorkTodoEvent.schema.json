@@ -1,0 +1,1 @@
+{"name":"Models.WorkTodoEvent","type":"record","fields":[{"name":"Description","type":"string"},{"name":"Note","type":["null","string"]},{"name":"Note2","default":"","type":["null","string"]},{"name":"Note3","default":"","type":["null","string"]}]}

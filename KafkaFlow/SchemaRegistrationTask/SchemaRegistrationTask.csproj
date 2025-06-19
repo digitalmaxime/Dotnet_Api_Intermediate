@@ -5,6 +5,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>SchemaRegistration</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,10 +21,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Models\Models.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="schemas\" />
     </ItemGroup>
 
 </Project>
