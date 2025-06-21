@@ -2,7 +2,6 @@
 using KafkaFlow;
 using KafkaFlowConsumer;
 using KafkaFlowConsumer.Handlers;
-using Microsoft.Extensions.Options;
 using Models;
 
 var builder = WebApplication.CreateBuilder(args);

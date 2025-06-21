@@ -9,22 +9,21 @@
     <ItemGroup>
         <!-- KafkaFlow -->
         <PackageReference Include="KafkaFlow" Version="4.0.0"/>
-        <PackageReference Include="KafkaFlow.Serializer.SchemaRegistry.ConfluentAvro" Version="4.0.0" />
-        <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="4.0.0"/>
         <PackageReference Include="KafkaFlow.Serializer.SchemaRegistry.ConfluentAvro" Version="4.0.0"/>
+        <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="4.0.0"/>
         <PackageReference Include="KafkaFlow.LogHandler.Console" Version="4.0.0"/>
         <PackageReference Include="KafkaFlow.TypedHandler" Version="2.5.1"/>
 
         <!-- Microdsoft -->
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>    
-      <ProjectReference Include="..\Models\Models.csproj" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Properties\launchSettings.json" />
+        <ProjectReference Include="..\Models\Models.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Properties\launchSettings.json"/>
     </ItemGroup>
 
 </Project>

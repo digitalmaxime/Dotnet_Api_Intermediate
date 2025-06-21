@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using Avro;
 using Avro.Specific;
+using Models.utils;
 
 namespace Models;
 
@@ -30,5 +31,5 @@ public class TrainingTodoEvent : ISpecificRecord
     }
 
     [IgnoreDataMember]
-    public Schema Schema => SchemaGenerator.GenerateAvroSchema<TrainingTodoEvent>();
+    public Schema Schema => AvroSchemaGenerator.GenerateAvroSchema<TrainingTodoEvent>();
 }

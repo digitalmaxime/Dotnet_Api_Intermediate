@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using Avro;
 using Avro.Specific;
+using Models.utils;
 
 namespace Models;
 
@@ -51,6 +52,6 @@ public class WorkTodoEvent : ISpecificRecord
 
 
     [IgnoreDataMember] // This tells Avro to ignore this property when generating schema
-    public Schema Schema => SchemaGenerator.GenerateAvroSchema<WorkTodoEvent>();
+    public Schema Schema => AvroSchemaGenerator.GenerateAvroSchema<WorkTodoEvent>();
 
 }

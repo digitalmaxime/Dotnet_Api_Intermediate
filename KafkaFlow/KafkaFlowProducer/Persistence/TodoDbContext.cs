@@ -1,4 +1,3 @@
-using KafkaFlowProducer.Endpoints;
 using KafkaFlowProducer.Entities;
 using Microsoft.EntityFrameworkCore;
 

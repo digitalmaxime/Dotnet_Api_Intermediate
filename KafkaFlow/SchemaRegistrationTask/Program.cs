@@ -1,8 +1,8 @@
 ﻿using Confluent.SchemaRegistry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Models;
+using SchemaRegistration.utils;
 
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -18,10 +18,22 @@ builder.Services.AddSingleton<ISchemaRegistryClient>(_ => new CachedSchemaRegist
 
 var host = builder.Build();
 
-using IServiceScope seviceProvider = host.Services.CreateScope();
-var serviceProvider = seviceProvider.ServiceProvider;
-using var schemaRegistryClient = serviceProvider.GetRequiredService<ISchemaRegistryClient>();
+using var serviceScope = host.Services.CreateScope();
+var serviceProvider = serviceScope.ServiceProvider;
+
+// Generate schemas
 var workTodoConfluentSchema = SchemaGenerator.GenerateSchema<WorkTodoEvent>();
 var trainingTodoConfluentSchema = SchemaGenerator.GenerateSchema<TrainingTodoEvent>();
 
-var schemaId = await SchemaGenerator.RegisterSchema("todos-Models.WorkTodoEvent", workTodoConfluentSchema);
+// Register schemas
+using var schemaRegistryClient = serviceProvider.GetRequiredService<ISchemaRegistryClient>();
+var workTodoSchemaId = await schemaRegistryClient.RegisterSchemaAsync("todos-Models.WorkTodoEvent", workTodoConfluentSchema);
+var trainingSchemaId = await schemaRegistryClient.RegisterSchemaAsync("todos-Models.TrainingTodoEvent", trainingTodoConfluentSchema);
+
+Console.WriteLine(workTodoSchemaId > 0
+    ? $"Successfully registered schema 'todos-Models.WorkTodoEvent' with ID: {workTodoSchemaId}"
+    : "Failed to register schema for 'todos-Models.WorkTodoEvent'.");
+
+Console.WriteLine(trainingSchemaId > 0
+    ? $"Successfully registered schema 'todos-Models.TrainingTodoEvent' with ID: {trainingSchemaId}"
+    : "Failed to register schema for 'todos-Models.TrainingTodoEvent'.");

@@ -1,5 +1,3 @@
-using System.Collections;
-using Confluent.SchemaRegistry;
 using KafkaFlow;
 using KafkaFlow.Producers;
 using KafkaFlowProducer.Entities;
@@ -56,7 +54,8 @@ public static class TodoEndpoints
             {
                 Description = todo.Description
             };
-            await producer.ProduceAsync(Constants.TopicName, "messageKey", messageValue, headers);
+            var toto = await producer.ProduceAsync(Constants.TopicName, "messageKey", messageValue, headers);
+            
             return Results.Created($"/api/todos/{todo.Id}", todo);
         });
 

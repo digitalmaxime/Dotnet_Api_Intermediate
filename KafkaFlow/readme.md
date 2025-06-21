@@ -7,14 +7,42 @@ This project is a simple example of how to use kafka flow to create work and tra
 KafkaFlowDemo project is a MinimalApi which produces events
 
 features:
-- Json Serializer
+- Avro Serializer
 - Multiple message (workTodo / trainingTodo) types in single topic
+- Schema registry 
+  - registration 
+  - validation
 
 ## How to run
 
-Spin up the kafka docker containers through docker-compose
+*** *from the root of the solution folder* ***
 
-dotnet run the producer and consumer
+Spin up the kafka docker containers through docker-compose
+```shell
+  docker compose up -d
+```
+
+Remove the existing schemas from the schema registry (optional)
+```shell
+  ./SchemaRegistrationTask/utils/clean_schemas.sh
+```
+
+run the schema registration console application
+```shell
+  dotnet run --project ./SchemaRegistrationTask/SchemaRegistrationTask.csproj
+```
+
+run the producer
+```shell
+  dotnet run --project ./KafkaFlowProducer/KafkaFlowProducer.csproj
+```
+
+run the consumer (in a different shell)
+```shell
+  dotnet run --project ./KafkaFlowConsumer/KafkaFlowConsumer.csproj
+```
+
+finally, test the producer endpoints with `KafkaFlowDemo.http` file
 
 ## Avro
 
