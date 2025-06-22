@@ -9,7 +9,8 @@ namespace Models;
 
 public class WorkTodoEvent : ISpecificRecord
 {
-    [Required] public required string Description { get; set; } = "default description";
+    // Important to add "string.Empty" for Avro deserializer to work
+    [Required] public required string Description { get; set; } = string.Empty;
 
     public string? Note { get; set; }
 

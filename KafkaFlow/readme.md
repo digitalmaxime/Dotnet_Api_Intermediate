@@ -42,27 +42,35 @@ run the producer
   dotnet run --project ./KafkaFlowProducer/KafkaFlowProducer.csproj
 ```
 
-run the consumer (in a different shell)
+run the consumer
 
 ```shell
   dotnet run --project ./KafkaFlowConsumer/KafkaFlowConsumer.csproj
 ```
 
-finally, test the producer endpoints with `KafkaFlowDemo.http` file
-
-or simply run this curl command
-
-# generate curl post command to call /api/todos/work
+finally, test the producer endpoints
 
 ```shell
-  curl -X POST `https://localhost:7104/api/todos/work` \
-    -H 'Content-Type: application/json' \
+  curl -X POST "https://localhost:7104/api/todos/work" \
+    -H "Content-Type: application/json" \
     -d '{
       "Title": "Title Work",
-      "Description": "Work your but off",
+      "Description": "Work your but off Jesus!",
       "DueDate": "2025-12-02"
     }' 
 ```
+
+```shell
+  curl -X POST "https://localhost:7104/api/todos/training" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "Title": "Title training",
+      "Description": "Train your but off mate!",
+      "DueDate": "2025-12-02"
+    }' 
+```
+
+(or with  with `KafkaFlowDemo.http` / `KafkaFLowDemo.sh` files)
 
 ## Avro
 

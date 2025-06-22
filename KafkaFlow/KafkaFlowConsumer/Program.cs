@@ -29,7 +29,7 @@ services.AddKafka(kafka => kafka
                 .WithGroupId(kafkaConfigurations.ConsumerGroupId)
                 .WithBufferSize(100)
                 .WithWorkersCount(20)
-                .WithAutoOffsetReset(AutoOffsetReset.Latest)
+                .WithAutoOffsetReset(AutoOffsetReset.Earliest)
                 .AddMiddlewares(
                     middlewares =>
                     {

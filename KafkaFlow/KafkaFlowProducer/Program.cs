@@ -33,7 +33,7 @@ builder.Services.AddKafka(kafka => kafka.AddCluster(cluster =>
                     {
                         AutoRegisterSchemas = true,
                         NormalizeSchemas = false,
-                        SubjectNameStrategy = SubjectNameStrategy.Topic,
+                        SubjectNameStrategy = SubjectNameStrategy.TopicRecord,
                     })
                 )
         );
