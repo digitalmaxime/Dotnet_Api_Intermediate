@@ -1,7 +1,7 @@
 using KafkaFlow;
 using Models;
 
-namespace KafkaFlowConsumer;
+namespace KafkaFlowConsumer.Handlers;
 
 public class WorkTodoMessageHandler : IMessageHandler<WorkTodoEvent>
 {
@@ -12,7 +12,8 @@ public class WorkTodoMessageHandler : IMessageHandler<WorkTodoEvent>
             "Partition: {0} | Offset: {1} | Message: {2}",
             context.ConsumerContext.Partition,
             context.ConsumerContext.Offset,
-            message.Description);
+            message.Description
+            );
 
         return Task.CompletedTask;
     }

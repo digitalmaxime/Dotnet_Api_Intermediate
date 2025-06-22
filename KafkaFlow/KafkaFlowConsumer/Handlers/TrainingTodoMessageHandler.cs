@@ -1,9 +1,9 @@
 using KafkaFlow;
 using Models;
 
-namespace KafkaFlowConsumer;
+namespace KafkaFlowConsumer.Handlers;
 
-public class TrainingMessageHandler : IMessageHandler<TrainingTodoEvent>
+public class TrainingTodoMessageHandler : IMessageHandler<TrainingTodoEvent>
 {
     public Task Handle(IMessageContext context, TrainingTodoEvent message)
     {

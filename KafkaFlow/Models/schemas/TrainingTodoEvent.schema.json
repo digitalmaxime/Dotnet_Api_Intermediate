@@ -1,0 +1,1 @@
+{"name":"Models.TrainingTodoEvent","type":"record","fields":[{"name":"Description","type":"string"}]}

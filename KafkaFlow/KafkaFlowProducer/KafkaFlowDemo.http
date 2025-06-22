@@ -2,6 +2,7 @@
 
 GET {{KafkaFlowProducer_HostAddress}}/api/todos/
 Accept: application/json
+
 ###
 DELETE /api/todos/
 Accept: application/json
@@ -13,8 +14,8 @@ Accept: application/json
 
 {
   "Id": 1,
-  "Title": "Title1",
-    "Description": "Description1",
+  "Title": "Title :)",
+  "Description": "Description :)",
   "DueDate": "2021-12-01"
 }
 
@@ -25,7 +26,7 @@ Accept: application/json
 
 {
   "Title": "Title Work",
-  "Description": "Work your but off",
+  "Description": "Work your but off asshole2!",
   "DueDate": "2025-12-02"
 }
 
@@ -36,6 +37,6 @@ Accept: application/json
 
 {
   "Title": "Title Training",
-  "Description": "Training your brain!",
+  "Description": "Training your brain man2!",
   "DueDate": "2025-12-02"
 }

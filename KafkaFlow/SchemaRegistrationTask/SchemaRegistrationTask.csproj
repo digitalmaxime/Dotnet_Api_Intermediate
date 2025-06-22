@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>SchemaRegistration</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Apache.Avro" Version="1.12.0" />
+      <PackageReference Include="Chr.Avro" Version="10.8.1" />
+      <PackageReference Include="Chr.Avro.Json" Version="10.8.1" />
+      <PackageReference Include="Confluent.SchemaRegistry" Version="2.10.0" />
+      <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.10.0" />
+      <PackageReference Include="KafkaFlow" Version="4.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+      <PackageReference Include="NJsonSchema" Version="11.3.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Models\Models.csproj" />
+    </ItemGroup>
+
+</Project>
