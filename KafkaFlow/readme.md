@@ -7,47 +7,69 @@ This project is a simple example of how to use kafka flow to create work and tra
 KafkaFlowDemo project is a MinimalApi which produces events
 
 features:
+
 - Avro Serializer
 - Multiple message (workTodo / trainingTodo) types in single topic
-- Schema registry 
-  - registration 
-  - validation
+- Schema registry
+    - registration
+    - validation
 
 ## How to run
 
 *** *from the root of the solution folder* ***
 
 Spin up the kafka docker containers through docker-compose
+
 ```shell
   docker compose up -d
 ```
 
 Remove the existing schemas from the schema registry (optional)
+
 ```shell
   ./SchemaRegistrationTask/utils/clean_schemas.sh
 ```
 
 run the schema registration console application
+
 ```shell
   dotnet run --project ./SchemaRegistrationTask/SchemaRegistrationTask.csproj
 ```
 
 run the producer
+
 ```shell
   dotnet run --project ./KafkaFlowProducer/KafkaFlowProducer.csproj
 ```
 
 run the consumer (in a different shell)
+
 ```shell
   dotnet run --project ./KafkaFlowConsumer/KafkaFlowConsumer.csproj
 ```
 
 finally, test the producer endpoints with `KafkaFlowDemo.http` file
 
+or simply run this curl command
+
+# generate curl post command to call /api/todos/work
+
+```shell
+  curl -X POST `https://localhost:7104/api/todos/work` \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "Title": "Title Work",
+      "Description": "Work your but off",
+      "DueDate": "2025-12-02"
+    }' 
+```
+
 ## Avro
 
 ## Key Differences Between JSON Schema and Avro
+
 When transitioning from JSON Schema to Avro, keep in mind these important differences:
+
 1. **Schema Evolution**: Avro has more robust schema evolution capabilities
 2. **Binary Format**: Avro serializes to a compact binary format (JSON Schema typically works with JSON)
 3. **Schema Inclusion**: Avro doesn't include the schema with each message (relies on Schema Registry)
@@ -55,7 +77,9 @@ When transitioning from JSON Schema to Avro, keep in mind these important differ
 5. **Naming Conventions**: Avro has stricter naming rules for fields and types
 
 ## Handling C# Types and Mapping to Avro
+
 Chr.Avro handles common C# types well, but here's how it maps types:
+
 - `string` → Avro `string`
 - `int`, `long`, etc. → Avro numeric types
 - `bool` → Avro `boolean`
@@ -67,10 +91,12 @@ Chr.Avro handles common C# types well, but here's how it maps types:
 - Dictionaries → Avro `map`
 - Nullable types → Avro union with `null`
 
-dependencies : 
+dependencies :
+
 - KafkaFlow nuget package
 
-reference : 
+reference :
+
 - [kafka flow](https://farfetch.github.io/kafkaflow/docs/)
 - [githup example](https://github.com/farfetch/kafkaflow)
 - [youtube tutorial](https://www.youtube.com/watch?v=4e18DZkf-m0&t=644s&ab_channel=GuiFerreira)

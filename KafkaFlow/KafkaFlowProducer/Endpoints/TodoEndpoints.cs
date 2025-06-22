@@ -16,8 +16,6 @@ public static class TodoEndpoints
 
         group.MapPost("work", async (Todo todo, IProducerAccessor producerAccessor, TodoDbContext context) =>
         {
-            context.Todos.Add(todo);
-            await context.SaveChangesAsync();
             var producer = producerAccessor.GetProducer("publish-todo-producer");
             var headers = new MessageHeaders
             {
@@ -35,13 +33,16 @@ public static class TodoEndpoints
             {
                 Description = "avro message"
             }, headers);
+            
+            context.Todos.Add(todo);
+            
+            await context.SaveChangesAsync();
+            
             return Results.Created($"/api/todos/{todo.Id}", todo);
         });
         
         group.MapPost("training", async (Todo todo, IProducerAccessor producerAccessor, TodoDbContext context) =>
         {
-            context.Todos.Add(todo);
-            await context.SaveChangesAsync();
             var producer = producerAccessor.GetProducer("publish-todo-producer");
             var headers = new MessageHeaders
             {
@@ -50,6 +51,11 @@ public static class TodoEndpoints
                     System.Text.Encoding.UTF8.GetBytes(Constants.MessageHeader.TrainingTodoValue)
                 }
             };
+            
+            context.Todos.Add(todo);
+            
+            await context.SaveChangesAsync();
+            
             var messageValue = new TrainingTodoEvent()
             {
                 Description = todo.Description

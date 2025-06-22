@@ -4,7 +4,7 @@ using KafkaFlowConsumer;
 using KafkaFlowConsumer.Handlers;
 using Models;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = Host.CreateApplicationBuilder(args);
 
 var kafkaConfigurations = builder.Configuration
     .GetSection(KafkaConfigurationOptions.SectionName)
@@ -46,14 +46,8 @@ services.AddKafka(kafka => kafka
     )
 );
 
+builder.Services.AddHostedService<KafkaBusService>();
+
 var app = builder.Build();
 
-var bus = app.Services.CreateKafkaBus();
-
-await bus.StartAsync();
-
-Console.WriteLine("press any key to exit");
-
-Console.ReadKey();
-
-await bus.StopAsync();
+await app.RunAsync();
