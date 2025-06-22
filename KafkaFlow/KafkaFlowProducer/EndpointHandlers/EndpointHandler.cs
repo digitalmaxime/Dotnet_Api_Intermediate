@@ -27,6 +27,7 @@ public static class EndpointHandler
         };
 
         var producer = producerAccessor.GetProducer("publish-todo-producer");
+        
         try
         {
             var deliveryReport =
@@ -69,6 +70,7 @@ public static class EndpointHandler
         };
 
         var producer = producerAccessor.GetProducer("publish-todo-producer");
+        
         var deliveryReport = await producer.ProduceAsync(Constants.TopicName, todo.Title, messageValue, headers);
 
         if (deliveryReport.Status == PersistenceStatus.NotPersisted)
