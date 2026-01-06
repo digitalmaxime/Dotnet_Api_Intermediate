@@ -1,24 +1,20 @@
+using AgentFrameworkChat.AI.Agents;
 using AgentFrameworkChat.Endpoints;
+using AgentFrameworkChat.Extensions.OpenApi;
+using AgentFrameworkChat.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.private.json").Build();
-var endpoint = configuration["AzureOpenAI:Endpoint"]!;
-var deploymentName = configuration["AzureOpenAI:DeploymentName"]!;
-var apiKey = configuration["AzureOpenAI:ApiKey"]!;
+builder.Services.AddOptions<AzureOpenAiOptions>().Bind(configuration.GetSection(AzureOpenAiOptions.SectionName));
+builder.Services.AddOptions<PostgresOptions>().Bind(configuration.GetSection(PostgresOptions.SectionName));
+builder.Services.AddScoped<IBasicAgent, BasicAgent>();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+builder.Services.ConfigureOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseOpenApiDocumentation();
 
 app.UseHttpsRedirection();
 

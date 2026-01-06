@@ -1,5 +1,7 @@
 ﻿using System.Text;
-using AgentFrameworkChat.AI;
+using AgentFrameworkChat.AI.Agents;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace AgentFrameworkChat.Endpoints;
 
@@ -16,11 +18,23 @@ public static class ConversationEndpoints
             return  conversations;
         });
 
-        group.MapPost("", async Task<string> (IBasicAgent agent, string message) =>
+        group.MapPost("", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext context, IBasicAgent agent, string message) =>
         {
-            _conversationsHistory.Add(message);
-            var response = await agent.SendMessage(message);
-            return response;
+            var header = context.Request.Headers["Authorization"];
+            if (header.Count == 0)
+            {
+                return TypedResults.BadRequest("No Authorization header found");
+            }
+
+            // read the token from the header
+            var accessToken = header[0]?.Replace("Bearer ", "");
+            var handler = new JsonWebTokenHandler();
+            if (!handler.CanReadToken(accessToken)) return TypedResults.BadRequest("Invalid token");
+            var token = handler.ReadJsonWebToken(accessToken);
+            var username = token.Claims.First(c => c.Type == "name").Value;
+            _conversationsHistory.Add(message);  // TODO: save to DB
+            var response = await agent.SendMessage(message, username);
+            return TypedResults.Ok(response);
         });
         
         return endpoints;
