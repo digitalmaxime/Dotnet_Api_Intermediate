@@ -10,3 +10,5 @@ Migrations/
 wwwroot/
 node_modules
 bower_components    
+
+**/*.private.json
