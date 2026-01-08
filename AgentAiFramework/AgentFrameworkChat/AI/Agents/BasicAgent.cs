@@ -1,4 +1,7 @@
-﻿using AgentFrameworkChat.AI.History;
+﻿using System.Text.Json;
+using Microsoft.Extensions.VectorData;
+
+using AgentFrameworkChat.AI.History;
 using AgentFrameworkChat.AI.Tools;
 using AgentFrameworkChat.Options;
 using Azure;
@@ -10,6 +13,7 @@ using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.PgVector;
 using OpenAI;
 using OpenAI.Assistants;
+using Npgsql; 
 
 namespace AgentFrameworkChat.AI.Agents;
 
@@ -39,17 +43,78 @@ public class BasicAgent(
                     Always provide personalized and helpful responses.",
                     Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime)]
                 },
-                ChatMessageStoreFactory = ctx => new MyChatMessageStore(ctx.SerializedState, postgresOptions.Value.ConnectionString, username)
+                ChatMessageStoreFactory = ctx => new MyChatMessageStore(
+                    ctx.SerializedState, 
+                    postgresOptions.Value.ConnectionString, username)
             });
         
-        // Get or create a thread for this user
-        if (!_threadCache.TryGetValue(username, out var thread))
+        var savedState = await LoadThreadStateForUserAsync(username);
+
+        AgentThread thread;
+        if (savedState is not null)
         {
+            // Restore existing thread with its internal state + reference to your ChatMessageStore
+            thread = agent.DeserializeThread(savedState ?? throw new InvalidOperationException()); 
+        }
+        else
+        {
+            // First‑ever conversation for this user
             thread = agent.GetNewThread();
-            _threadCache[username] = thread;
-        }        
+            // Serialize the thread state to a JsonElement, so it can be stored for later use.
+            JsonElement serializedThreadState = thread.Serialize();
+            await SaveThreadStateForUserAsync(username, serializedThreadState);
+        }
+        
         var response = await agent.RunAsync(message, thread);
         
         return response.Text;
+    }
+    
+    
+    
+    public class ThreadStateSchema
+    {
+        // This will be the primary key (e.g. username)
+        [VectorStoreKey]
+        public string Key { get; set; } = default!;
+
+        // Your serialized AgentThread state as JSON text
+        [VectorStoreData]
+        public string SerializedState { get; set; } = default!;
+    }
+    
+    private async Task SaveThreadStateForUserAsync(string username, JsonElement state, CancellationToken cancellationToken = default)
+    {
+        // Reuse the same PostgresVectorStore connection string you already use
+        var vectorStore = new PostgresVectorStore(postgresOptions.Value.ConnectionString);
+
+        var collection = vectorStore.GetCollection<string, ThreadStateSchema>("ThreadState");
+        await collection.EnsureCollectionExistsAsync(cancellationToken);
+
+        var jsonText = state.Clone().GetRawText();
+
+        var record = new ThreadStateSchema
+        {
+            Key = username,
+            SerializedState = jsonText
+        };
+
+        await collection.UpsertAsync(new[] { record }, cancellationToken);
+    }
+    
+    private async Task<JsonElement?> LoadThreadStateForUserAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var vectorStore = new PostgresVectorStore(postgresOptions.Value.ConnectionString);
+
+        var collection = vectorStore.GetCollection<string, ThreadStateSchema>("ThreadState");
+        await collection.EnsureCollectionExistsAsync(cancellationToken);
+
+        await foreach (var record in collection.GetAsync(r => r.Key == username, top: 1, cancellationToken: cancellationToken))
+        {
+            using var doc = JsonDocument.Parse(record.SerializedState);
+            return doc.RootElement.Clone();
+        }
+
+        return null;
     }
 }
