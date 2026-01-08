@@ -1,5 +1,4 @@
-﻿using System.Text;
-using AgentFrameworkChat.AI.Agents;
+﻿using AgentFrameworkChat.AI.Agents;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.JsonWebTokens;
 

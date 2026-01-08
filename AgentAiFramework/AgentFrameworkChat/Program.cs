@@ -1,4 +1,5 @@
 using AgentFrameworkChat.AI.Agents;
+using AgentFrameworkChat.AI.History;
 using AgentFrameworkChat.Endpoints;
 using AgentFrameworkChat.Extensions.OpenApi;
 using AgentFrameworkChat.Options;
@@ -9,6 +10,7 @@ IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettin
 builder.Services.AddOptions<AzureOpenAiOptions>().Bind(configuration.GetSection(AzureOpenAiOptions.SectionName));
 builder.Services.AddOptions<PostgresOptions>().Bind(configuration.GetSection(PostgresOptions.SectionName));
 builder.Services.AddScoped<IBasicAgent, BasicAgent>();
+builder.Services.AddScoped<IThreadStore, ThreadStore>();
 
 builder.Services.ConfigureOpenApi();
 
