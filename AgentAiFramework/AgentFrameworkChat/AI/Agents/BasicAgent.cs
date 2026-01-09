@@ -8,7 +8,8 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using OpenAI;
-
+// using Microsoft.Agents.AI.Hosting;
+    
 namespace AgentFrameworkChat.AI.Agents;
 
 public class BasicAgent(
@@ -19,6 +20,11 @@ public class BasicAgent(
 {
     public async Task<string> SendMessage(string message, string username)
     {
+        
+        var reservationTool = AIFunctionFactory.Create(ReservationTool.MakeAReservation);
+#pragma warning disable MEAI001
+        var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(reservationTool);
+        
         AIAgent agent = new AzureOpenAIClient(
                 new Uri(azureOpenAiConfiguration.Value.endpoint),
                 new AzureKeyCredential(azureOpenAiConfiguration.Value.apiKey)
@@ -34,7 +40,7 @@ public class BasicAgent(
                     When greeting or addressing the user, use their name: {username}.
                     You can get the current date/time when needed using your available tools.
                     Always provide personalized and helpful responses.",
-                    Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime)]
+                    Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime), approvalRequiredReservationTool]
                 },
                 ChatMessageStoreFactory = ctx => new MyChatMessageStore(
                     ctx.SerializedState, 
@@ -60,6 +66,15 @@ public class BasicAgent(
         }
         
         var response = await agent.RunAsync(message, thread);
+        var functionApprovalRequests = response.Messages
+            .SelectMany(x => x.Contents)
+            .OfType<FunctionApprovalRequestContent>()
+            .ToList();
+
+        FunctionApprovalRequestContent requestContent = functionApprovalRequests.First();
+        Console.WriteLine($"We require approval to execute '{requestContent.FunctionCall.Name}'");
+        var approvalMessage = new ChatMessage(ChatRole.User, [requestContent.CreateResponse(true)]);
+        Console.WriteLine(await agent.RunAsync(approvalMessage, thread));
         
         return response.Text;
     }

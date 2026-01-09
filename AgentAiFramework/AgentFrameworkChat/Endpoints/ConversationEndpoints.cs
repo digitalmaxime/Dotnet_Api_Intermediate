@@ -1,4 +1,5 @@
 ﻿using AgentFrameworkChat.AI.Agents;
+using AgentFrameworkChat.Features;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -33,6 +34,13 @@ public static class ConversationEndpoints
             var username = token.Claims.First(c => c.Type == "name").Value;
             _conversationsHistory.Add(message);  // TODO: save to DB
             var response = await agent.SendMessage(message, username);
+            return TypedResults.Ok(response);
+        });
+        
+        group.MapPost("v2", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string message) =>
+        {
+            var user = httpContext.User;
+            var response = await chatService.SendMessage(user, message);
             return TypedResults.Ok(response);
         });
         

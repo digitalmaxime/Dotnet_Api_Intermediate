@@ -9,23 +9,25 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.22" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.22" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.11.10" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
     </ItemGroup>
 
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.22" />
+        <PackageReference Include="OpenAI" Version="2.8.0" />
+        <PackageReference Include="Microsoft.Agents.AI.DevUI" Version="1.0.0-preview.251219.1" />
+        <PackageReference Include="Microsoft.Agents.AI.Hosting" Version="1.0.0-preview.251219.1" />
         <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251219.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
-        <PackageReference Include="Azure.AI.OpenAI" Version="2.7.0-beta.2" />
-        <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251204.1" />
+        <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251219.1" />
+        <PackageReference Include="Azure.AI.OpenAI" Version="2.8.0-beta.1" />
         <PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.68.0-preview" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\" />
       <Folder Include="Models\" />
     </ItemGroup>
 
