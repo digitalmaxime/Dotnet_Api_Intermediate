@@ -37,10 +37,10 @@ public static class ConversationEndpoints
             return TypedResults.Ok(response);
         });
         
-        group.MapPost("v2", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string message) =>
+        group.MapPost("v2", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string username, string message) =>
         {
             var user = httpContext.User;
-            var response = await chatService.SendMessage(user, message);
+            var response = await chatService.SendMessage(username, message);
             return TypedResults.Ok(response);
         });
         

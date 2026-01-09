@@ -15,6 +15,7 @@ public sealed class ThreadStore( IOptions<PostgresOptions> postgresOptions) : IT
 {
     public async Task SaveThreadStateForUserAsync(string username, JsonElement state, CancellationToken cancellationToken = default)
     {
+        // TODO: no need to use verctor store, use normal database instead with EF Core
         // Reuse the same PostgresVectorStore connection string you already use
         var vectorStore = new PostgresVectorStore(postgresOptions.Value.ConnectionString);
         var collection = vectorStore.GetCollection<string, ThreadStateSchema>("ThreadState");

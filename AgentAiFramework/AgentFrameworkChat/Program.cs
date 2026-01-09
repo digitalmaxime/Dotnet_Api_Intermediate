@@ -6,29 +6,35 @@ using AgentFrameworkChat.Features;
 using AgentFrameworkChat.Options;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Agents.AI.Hosting;
+using Microsoft.Agents.AI.Workflows;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.private.json").Build();
+IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.private.json").Build(); // TODO: Move to user secrets
 builder.Services.AddOptions<AzureOpenAiOptions>().Bind(configuration.GetSection(AzureOpenAiOptions.SectionName));
 builder.Services.AddOptions<PostgresOptions>().Bind(configuration.GetSection(PostgresOptions.SectionName));
 builder.Services.AddScoped<IBasicAgent, BasicAgent>();
 builder.Services.AddScoped<IThreadStore, ThreadStore>();
-builder.Services.AddScoped<IAgentFactory, AgentFactory>();
+builder.Services.AddTransient<IAgentFactory, AgentFactory>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.ConfigureOpenApi();
 
 /* Dev UI OpenAi dependencies */
 builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
-builder.Services.AddAIAgent("BasicChatAgent", (sp, name) =>
+
+builder.AddAIAgent("BasicChatAgent", (sp, name) =>
 {
     var factory = sp.GetRequiredService<IAgentFactory>();
     return factory.CreateAgent();
 });
+
+// builder.AddWorkflow("BasicWorkflow", (sp, name) =>
+// {
+//     return new Workflow();
+// });
 
 var app = builder.Build();
 
@@ -39,11 +45,11 @@ app.UseHttpsRedirection();
 app.MapConversationEndpoints();
 
 /* Dev UI OpenAi dependencies */
-app.MapOpenAIResponses();
-app.MapOpenAIConversations();
 if (app.Environment.IsDevelopment())
 {
-    app.MapDevUI();
+    app.MapOpenAIResponses();
+    app.MapOpenAIConversations();
+    app.MapDevUI(); // vistit /devui
 }
 
 app.Run();

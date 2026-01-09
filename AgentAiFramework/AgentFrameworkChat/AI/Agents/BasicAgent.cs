@@ -8,8 +8,10 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using OpenAI;
-// using Microsoft.Agents.AI.Hosting;
-    
+using OpenAI.Chat;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+
+
 namespace AgentFrameworkChat.AI.Agents;
 
 public class BasicAgent(
@@ -24,11 +26,10 @@ public class BasicAgent(
         var reservationTool = AIFunctionFactory.Create(ReservationTool.MakeAReservation);
 #pragma warning disable MEAI001
         var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(reservationTool);
-        
-        AIAgent agent = new AzureOpenAIClient(
+        var agent = new AzureOpenAIClient(
                 new Uri(azureOpenAiConfiguration.Value.endpoint),
                 new AzureKeyCredential(azureOpenAiConfiguration.Value.apiKey)
-                )
+            )
             .GetChatClient(azureOpenAiConfiguration.Value.deploymentName)
             .CreateAIAgent(new ChatClientAgentOptions
             {
@@ -41,9 +42,10 @@ public class BasicAgent(
                     You can get the current date/time when needed using your available tools.
                     Always provide personalized and helpful responses.",
                     Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime), approvalRequiredReservationTool]
+                    // ResponseFormat = new ChatResponseFormatJson(J) // TODO:
                 },
                 ChatMessageStoreFactory = ctx => new MyChatMessageStore(
-                    ctx.SerializedState, 
+                    ctx.SerializedState,
                     postgresOptions.Value.ConnectionString, username)
             });
         
