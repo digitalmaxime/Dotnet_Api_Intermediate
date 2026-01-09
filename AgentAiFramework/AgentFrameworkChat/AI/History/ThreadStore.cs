@@ -17,7 +17,6 @@ public sealed class ThreadStore( IOptions<PostgresOptions> postgresOptions) : IT
     {
         // Reuse the same PostgresVectorStore connection string you already use
         var vectorStore = new PostgresVectorStore(postgresOptions.Value.ConnectionString);
-
         var collection = vectorStore.GetCollection<string, ThreadStateSchema>("ThreadState");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
 

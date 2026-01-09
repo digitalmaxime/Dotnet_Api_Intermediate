@@ -46,7 +46,7 @@ public class MyChatMessageStore(JsonElement serializedStoreState, string connect
         await collection.EnsureCollectionExistsAsync(cancellationToken);
         await collection.UpsertAsync(messages.Select(x => new ChatHistorySchema
         {
-            Key = VectorStoreHelper.GenerateChatMessageIntKey(ThreadDbKey, x.MessageId),
+            Key = VectorStoreHelper.GenerateChatMessageIntKey(ThreadDbKey, x.MessageId ?? $"{DateTimeOffset.UtcNow:O}:{Guid.NewGuid():N}"),
             Timestamp = DateTimeOffset.UtcNow,
             ThreadId = ThreadDbKey,
             SerializedMessage = JsonSerializer.Serialize(x),
