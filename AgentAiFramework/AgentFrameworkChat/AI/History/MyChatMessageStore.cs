@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
@@ -6,6 +7,7 @@ using Microsoft.SemanticKernel.Connectors.PgVector;
 
 namespace AgentFrameworkChat.AI.History;
 
+[Experimental("MEAI001")]
 public class MyChatMessageStore(JsonElement serializedStoreState, string connectionString, string username)
     : ChatMessageStore
 {
@@ -39,6 +41,8 @@ public class MyChatMessageStore(JsonElement serializedStoreState, string connect
     {
         // TODO: implement reducer
         ThreadDbKey ??= username;
+        var firstMessage = messages.First();
+        var serializedMessage1 = JsonSerializer.Serialize(firstMessage, AgentAbstractionsJsonUtilities.DefaultOptions);
         
         var collection = _vectorStore.GetCollection<string, ChatHistorySchema>("ChatHistory");
         await collection.EnsureCollectionExistsAsync(cancellationToken);
@@ -47,9 +51,10 @@ public class MyChatMessageStore(JsonElement serializedStoreState, string connect
             Key = VectorStoreHelper.GenerateChatMessageIntKey(ThreadDbKey, x.MessageId ?? $"{DateTimeOffset.UtcNow:O}:{Guid.NewGuid():N}"),
             Timestamp = DateTimeOffset.UtcNow,
             ThreadId = ThreadDbKey,
-            SerializedMessage = JsonSerializer.Serialize(x),
+            SerializedMessage = serializedMessage1,
             MessageText = x.Text
         }), cancellationToken);
+        
     }
 
     // We have to serialize the thread id so that on deserialization you can retrieve the messages using the same thread id.

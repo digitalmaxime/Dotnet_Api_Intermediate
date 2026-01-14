@@ -30,7 +30,7 @@ public class AgentFactory(
             user?.FindFirstValue("name") ??
             "anonymous";
 
-        var reservationTool = AIFunctionFactory.Create(ReservationTool.MakeAReservation);
+        var reservationTool = AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza);
 #pragma warning disable MEAI001
         var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(reservationTool);
 

@@ -1,6 +1,7 @@
 using AgentFrameworkChat.AI.Agents;
 using AgentFrameworkChat.AI.History;
 using AgentFrameworkChat.Endpoints;
+using AgentFrameworkChat.Extensions.AgentRegistration;
 using AgentFrameworkChat.Extensions.OpenApi;
 using AgentFrameworkChat.Features;
 using AgentFrameworkChat.Options;
@@ -18,23 +19,14 @@ builder.Services.AddScoped<IThreadStore, ThreadStore>();
 builder.Services.AddTransient<IAgentFactory, AgentFactory>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddAuthorization();
 builder.Services.ConfigureOpenApi();
 
 /* Dev UI OpenAi dependencies */
 builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
 
-builder.AddAIAgent("BasicChatAgent", (sp, name) =>
-{
-    var factory = sp.GetRequiredService<IAgentFactory>();
-    return factory.CreateAgent();
-});
-
-// builder.AddWorkflow("BasicWorkflow", (sp, name) =>
-// {
-//     return new Workflow();
-// });
+builder.Services.RegisterAgents();
 
 var app = builder.Build();
 
@@ -49,7 +41,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenAIResponses();
     app.MapOpenAIConversations();
-    app.MapDevUI(); // vistit /devui
+    app.MapDevUI();
 }
 
 app.Run();

@@ -37,9 +37,22 @@ public static class ConversationEndpoints
             return TypedResults.Ok(response);
         });
         
-        group.MapPost("v2", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string username, string message) =>
+        group.MapPost("v2", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string message) =>
         {
-            var user = httpContext.User;
+            var header = httpContext.Request.Headers["Authorization"];
+            if (header.Count == 0)
+            {
+                return TypedResults.BadRequest("No Authorization header found");
+            }
+
+            // read the token from the header
+            var accessToken = header[0]?.Replace("Bearer ", "");
+            var handler = new JsonWebTokenHandler();
+            if (!handler.CanReadToken(accessToken)) return TypedResults.BadRequest("Invalid token");
+            var token = handler.ReadJsonWebToken(accessToken);
+            var username = token.Claims.First(c => c.Type == "name").Value;
+            
+            var username2 = httpContext.User.Identity?.Name;
             var response = await chatService.SendMessage(username, message);
             return TypedResults.Ok(response);
         });

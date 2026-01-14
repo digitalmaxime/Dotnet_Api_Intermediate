@@ -5,8 +5,8 @@
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": false,
-      "launchUrl": "swagger",
+      "launchBrowser": true,
+      "launchUrl": "devui",
       "applicationUrl": "https://localhost:7058;",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

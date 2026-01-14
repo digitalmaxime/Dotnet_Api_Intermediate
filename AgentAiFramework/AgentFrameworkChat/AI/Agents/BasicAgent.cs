@@ -23,7 +23,7 @@ public class BasicAgent(
     public async Task<string> SendMessage(string message, string username)
     {
         
-        var reservationTool = AIFunctionFactory.Create(ReservationTool.MakeAReservation);
+        var reservationTool = AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza);
 #pragma warning disable MEAI001
         var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(reservationTool);
         var agent = new AzureOpenAIClient(
