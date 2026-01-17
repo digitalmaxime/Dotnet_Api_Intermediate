@@ -12,13 +12,11 @@ public interface IChatService
     Task<string> SendMessage(string conversationId, string message);
 }
 
-public class ChatService(IAgentFactory agentFactory, IThreadStore threadStore) : IChatService
+public class ChatService([FromKeyedServices("BasicChatAgent")] AIAgent agent, IThreadStore threadStore) : IChatService
 {
     public async Task<string> SendMessage(string conversationId, string message)
     {
         var savedState = await threadStore.LoadThreadStateForUserAsync(conversationId);
-
-        var agent = agentFactory.CreateAgent();
         
         AgentThread thread;
         if (savedState is not null)
@@ -57,8 +55,6 @@ public class ChatService(IAgentFactory agentFactory, IThreadStore threadStore) :
     public async Task<string> SendApprovalMessage(string conversationId, string message)
     {
         var savedState = await threadStore.LoadThreadStateForUserAsync(conversationId);
-
-        var agent = agentFactory.CreateAgent();
         
         AgentThread thread;
         if (savedState is not null)

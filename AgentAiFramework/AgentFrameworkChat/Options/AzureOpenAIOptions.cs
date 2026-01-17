@@ -3,7 +3,7 @@
 public class AzureOpenAiOptions
 {
     public const string SectionName = "AzureOpenAI"; 
-    public string endpoint { get; set; }
-    public string deploymentName { get; set; }
-    public string apiKey { get; set; }
+    public required string Endpoint { get; set; }
+    public required string DeploymentName { get; set; }
+    public required string ApiKey { get; set; }
 }
