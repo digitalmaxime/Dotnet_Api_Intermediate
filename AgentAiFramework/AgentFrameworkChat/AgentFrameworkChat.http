@@ -1,0 +1,6 @@
+@AgentFrameworkChat_HostAddress = http://localhost:5177
+
+GET {{AgentFrameworkChat_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
