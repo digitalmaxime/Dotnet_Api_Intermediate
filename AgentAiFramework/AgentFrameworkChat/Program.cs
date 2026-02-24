@@ -10,7 +10,6 @@ using Microsoft.Agents.AI.Workflows;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.private.json").Build(); // TODO: Move to user secrets
 builder.Services.AddScoped<IThreadStore, ThreadStore>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IPizzaService, PizzaService>();
@@ -21,8 +20,8 @@ builder.Services.ConfigureOpenApi();
 /* Dev UI OpenAi dependencies */
 builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
-var azureOpenAiOptions = configuration.GetRequiredSection(AzureOpenAiOptions.SectionName).Get<AzureOpenAiOptions>();
-var postgresOptions = configuration.GetRequiredSection(PostgresOptions.SectionName).Get<PostgresOptions>();
+var azureOpenAiOptions = builder.Configuration.GetRequiredSection(AzureOpenAiOptions.SectionName).Get<AzureOpenAiOptions>();
+var postgresOptions = builder.Configuration.GetRequiredSection(PostgresOptions.SectionName).Get<PostgresOptions>();
 builder.Services.AddAIAgent("BasicChatAgent", (sp, name) => AgentFactory.CreateAgent(sp, azureOpenAiOptions, postgresOptions));
 
 var app = builder.Build();

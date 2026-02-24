@@ -17,9 +17,9 @@ public class AgentFactory
     public static AIAgent CreateAgent(IServiceProvider serviceProvider, AzureOpenAiOptions azureOpenAiOptions, PostgresOptions postgresOptions)
     {
 
-        var reservationTool = AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza);
+        var pizzaOrderTool = AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza);
 #pragma warning disable MEAI001
-        var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(reservationTool);
+        var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(pizzaOrderTool);
 
         
         
