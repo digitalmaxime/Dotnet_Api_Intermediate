@@ -1,82 +1,67 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using AgentFrameworkChat.Contracts.Repositories;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
-using Microsoft.SemanticKernel.Connectors.PgVector;
 
 namespace AgentFrameworkChat.AI.History;
 
 [Experimental("MEAI001")]
-public class MyChatMessageStore(JsonElement serializedStoreState, string connectionString, string username)
-    : ChatMessageStore
+public class MyChatMessageStore(
+    JsonElement serializedStoreState,
+    string connectionString,
+    IMessageRepository messageRepository)
+    : ChatHistoryProvider
 {
-    private readonly VectorStore _vectorStore = new PostgresVectorStore(connectionString!);
-    private string? ThreadDbKey { get; set; } = serializedStoreState.ValueKind is JsonValueKind.String
-        ? serializedStoreState.Deserialize<string>()
-        : username;
+    private Guid? ConversationKey { get; set; }
+    private const int MaxHistorySize = 100;
 
-    public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(CancellationToken cancellationToken = new())
+    public Guid GetConversationKey()
     {
-        var collection = _vectorStore.GetCollection<string, ChatHistorySchema>("ChatHistory");
-        await collection.EnsureCollectionExistsAsync(cancellationToken);
-        var records = collection
-            .GetAsync(
-                x => x.ThreadId == ThreadDbKey, top: 10,
-                new FilteredRecordRetrievalOptions<ChatHistorySchema>
-                    { OrderBy = x => x.Descending(y => y.Timestamp) },
-                cancellationToken);
-        List<ChatMessage> messages = [];
-        await foreach (var record in records)
+        if (ConversationKey is not null)
         {
-            messages.Add(JsonSerializer.Deserialize<ChatMessage>(record.SerializedMessage!)!);
+            return ConversationKey.Value;
         }
 
-        messages.Reverse();
-        return messages;
+        if (serializedStoreState.ValueKind == JsonValueKind.String)
+        {
+            var conversationIdString = serializedStoreState.GetString();
+            if (!Guid.TryParse(conversationIdString, out var conversationId) || conversationId == Guid.Empty)
+            {
+                throw new ArgumentException($"Invalid conversation key '{conversationIdString}");
+            }
+
+            ConversationKey = conversationId;
+        }
+        else
+        {
+            ConversationKey = Guid.CreateVersion7();
+        }
+
+        return ConversationKey.Value;
     }
 
-    public async ValueTask AddMessagesAsync(IEnumerable<ChatMessage> messages,
+    public override async ValueTask<IEnumerable<ChatMessage>> InvokingAsync(InvokingContext context,
         CancellationToken cancellationToken = new())
     {
-        // TODO: implement reducer
-        ThreadDbKey ??= username;
-        var firstMessage = messages.First();
-        var serializedMessage1 = JsonSerializer.Serialize(firstMessage, AgentAbstractionsJsonUtilities.DefaultOptions);
-        
-        var collection = _vectorStore.GetCollection<string, ChatHistorySchema>("ChatHistory");
-        await collection.EnsureCollectionExistsAsync(cancellationToken);
-        await collection.UpsertAsync(messages.Select(x => new ChatHistorySchema
-        {
-            Key = VectorStoreHelper.GenerateChatMessageIntKey(ThreadDbKey, x.MessageId ?? $"{DateTimeOffset.UtcNow:O}:{Guid.NewGuid():N}"),
-            Timestamp = DateTimeOffset.UtcNow,
-            ThreadId = ThreadDbKey,
-            SerializedMessage = serializedMessage1,
-            MessageText = x.Text
-        }), cancellationToken);
-        
+        return await messageRepository.GetContextMessagesAsync(GetConversationKey(), MaxHistorySize, cancellationToken);
     }
 
-    // We have to serialize the thread id so that on deserialization you can retrieve the messages using the same thread id.
-    public override async ValueTask<IEnumerable<ChatMessage>> InvokingAsync(InvokingContext context, CancellationToken cancellationToken = new CancellationToken())
+    public override async ValueTask InvokedAsync(InvokedContext context,
+        CancellationToken cancellationToken = new())
     {
-// Ensure we have a stable key for this user/thread.
-        ThreadDbKey ??= username;
-
-        // Provide stored history to the agent/model for this turn.
-        return await GetMessagesAsync(cancellationToken);    }
-
-    public override async ValueTask InvokedAsync(InvokedContext context, CancellationToken cancellationToken = new CancellationToken())
-    {
-// Ensure we have a stable key for this user/thread.
-        ThreadDbKey ??= username;
-
-        // Persist both the sent request messages and the generated response messages.
-        // (If you see duplicates, you can add a de-dupe strategy here based on MessageId/Text/Timestamp.)
-        await AddMessagesAsync(context.RequestMessages, cancellationToken);
-        await AddMessagesAsync(context.ResponseMessages, cancellationToken);    }
+        var requestMessages = context.RequestMessages.Where(m => m.Role != ChatRole.System);
+        await messageRepository.AddMessagesAsync(requestMessages, GetConversationKey(), cancellationToken);
+        if (context.ResponseMessages != null)
+        {
+            await messageRepository.AddMessagesAsync(context.ResponseMessages, GetConversationKey(), cancellationToken);
+        }
+        else
+        {
+            throw new InvalidOperationException("No response messages returned from AI");
+        }
+    }
 
     public override JsonElement Serialize(JsonSerializerOptions? jsonSerializerOptions = null) =>
-        JsonSerializer.SerializeToElement(ThreadDbKey);
-    
+        JsonSerializer.SerializeToElement(GetConversationKey(), AgentAbstractionsJsonUtilities.DefaultOptions);
 }
