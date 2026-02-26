@@ -9,9 +9,9 @@ public interface IConversationRepository
 
     Task<ConversationModel?> GetConversation(Guid conversationId, CancellationToken cancellationToken = default);
     
-    Task<Guid> AddNewConversationAsync(Guid conversationId, string username, string title, JsonElement state, CancellationToken cancellationToken = default);
+    Task<Guid> AddNewConversation(Guid conversationId, string username, string title, JsonElement state, CancellationToken cancellationToken = default);
 
-    Task<JsonElement> GetConversationSessionAsync(Guid conversationId, CancellationToken cancellationToken = default);
+    Task<JsonElement> GetConversationSession(Guid conversationId, CancellationToken cancellationToken = default);
 
     Task RenameConversation(Guid conversationId, string newConversationName,
         CancellationToken cancellationToken = default);
@@ -20,5 +20,5 @@ public interface IConversationRepository
     
     Task ArchiveUserConversation(Guid conversationId, CancellationToken cancellationToken = default);
     
-    Task PurgeConversationsOlderThanAsync(Guid conversationId, int numberOfDays, CancellationToken cancellationToken = default);
+    Task PurgeConversationsOlderThan(Guid conversationId, int numberOfDays, CancellationToken cancellationToken = default);
 }

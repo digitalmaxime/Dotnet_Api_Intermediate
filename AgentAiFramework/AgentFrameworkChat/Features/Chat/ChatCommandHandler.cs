@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using AgentFrameworkChat.AI.Agents;
 using AgentFrameworkChat.AI.History;
 using AgentFrameworkChat.Contracts.Repositories;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.AI;
 
 namespace AgentFrameworkChat.Features.Chat;
 
+[Experimental("MEAI001")]
 public class ChatCommandHandler(
     [FromKeyedServices(AgentFactory.AgentName)]
     AIAgent agent,
@@ -74,7 +74,7 @@ public class ChatCommandHandler(
 
     }
     
-    [Experimental("MEAI001")]
+ 
     private async Task<(AgentSession, Guid)> CreateNewSessionAsync(string message, string username,
         CancellationToken cancellationToken)
     {
@@ -93,7 +93,7 @@ public class ChatCommandHandler(
 
         var title = message[..Math.Min(50, message.Length)];
 
-        await conversationRepository.AddNewConversationAsync(conversationId, username, title, serializedSession,
+        await conversationRepository.AddNewConversation(conversationId, username, title, serializedSession,
             cancellationToken);
 
         return (session, conversationId);
@@ -101,7 +101,7 @@ public class ChatCommandHandler(
 
     private async Task<(AgentSession, Guid)> GetExistingSessionAsync(Guid conversationId, CancellationToken cancellationToken)
     {
-        var savedState = await conversationRepository.GetConversationSessionAsync(conversationId, cancellationToken);
+        var savedState = await conversationRepository.GetConversationSession(conversationId, cancellationToken);
         
         var session = await agent.DeserializeSessionAsync(savedState, AgentAbstractionsJsonUtilities.DefaultOptions, cancellationToken);
 
