@@ -18,7 +18,7 @@ public static class ConversationEndpoints
             return  conversations;
         });
         
-        group.MapPost("", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, IChatService chatService, string message) =>
+        group.MapPost("", async Task<Results<Ok<string>, BadRequest<string>>> (HttpContext httpContext, string message) =>
         {
             var header = httpContext.Request.Headers["Authorization"];
             if (header.Count == 0)
@@ -34,8 +34,8 @@ public static class ConversationEndpoints
             var username = token.Claims.First(c => c.Type == "name").Value;
             
             var username2 = httpContext.User.Identity?.Name;
-            var response = await chatService.SendMessage(username, message);
-            return TypedResults.Ok(response);
+            // var response = await chatService.SendMessage(username, message);
+            return TypedResults.Ok("Hello");
         });
         
         return endpoints;

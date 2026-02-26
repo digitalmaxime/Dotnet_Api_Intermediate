@@ -10,9 +10,6 @@ using Microsoft.Agents.AI.Workflows;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IThreadStore, ThreadStore>();
-builder.Services.AddScoped<IChatService, ChatService>();
-builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();
 builder.Services.ConfigureOpenApi();
@@ -20,9 +17,6 @@ builder.Services.ConfigureOpenApi();
 /* Dev UI OpenAi dependencies */
 builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
-var azureOpenAiOptions = builder.Configuration.GetRequiredSection(AzureOpenAiOptions.SectionName).Get<AzureOpenAiOptions>();
-var postgresOptions = builder.Configuration.GetRequiredSection(PostgresOptions.SectionName).Get<PostgresOptions>();
-builder.Services.AddAIAgent("BasicChatAgent", (sp, name) => AgentFactory.CreateAgent(sp, azureOpenAiOptions, postgresOptions));
 
 var app = builder.Build();
 

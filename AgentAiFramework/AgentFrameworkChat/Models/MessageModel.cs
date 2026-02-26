@@ -3,7 +3,7 @@ using AgentFrameworkChat.Enums;
 
 namespace AgentFrameworkChat.Models;
 
-public class ChatMessageModel
+public class MessageModel
 {
     [Description("The role of the user in the conversation. User or Assistant")]
     public required MessageRole Role { get; set; }

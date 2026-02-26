@@ -11,7 +11,7 @@ public interface IMessageRepository
     Task<List<ChatMessage>> GetContextMessagesAsync(Guid conversationId, int take,
         CancellationToken cancellationToken = default);
 
-    Task<List<ChatMessageModel>> GetFilteredChatMessagesAsync(Guid conversationId, int take,
+    Task<List<MessageModel>> GetFilteredChatMessagesAsync(Guid conversationId, int take,
         CancellationToken cancellationToken = default);
 
     Task UpdateMessageAsync(Guid messageId, string updateContent, CancellationToken cancellationToken);

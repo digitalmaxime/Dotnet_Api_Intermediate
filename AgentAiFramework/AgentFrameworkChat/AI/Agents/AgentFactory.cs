@@ -21,11 +21,6 @@ public class AgentFactory
     {
         var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
 
-        var pizzaOrderTool = AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza);
-
-        var approvalRequiredReservationTool = new ApprovalRequiredAIFunction(pizzaOrderTool);
-
-
         var chatClient = new AzureOpenAIClient(
                 new Uri(azureOpenAiOptions.Endpoint),
                 new AzureKeyCredential(azureOpenAiOptions.ApiKey)
@@ -42,7 +37,7 @@ public class AgentFactory
                     When greeting or addressing the user, use their name: username .
                     You can get the current date/time when needed using your available tools.
                     Always provide personalized and helpful responses.",
-                Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime), approvalRequiredReservationTool]
+                Tools = [AIFunctionFactory.Create(DateTimeTool.GetDateTime), PizzaDeliveryTool.ApprovalRequiredReservationTool]
 
             },
             ChatHistoryProviderFactory = (ctx, _) =>

@@ -6,7 +6,7 @@ public enum MessageType
     Reasoning,
     FunctionCall,
     FunctionResult,
-    FUnctionApprovalRequest,
+    FunctionApprovalRequest,
     FunctionApprovalResponse,
     Error
 }
