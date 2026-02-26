@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
       <UserSecretsId>5ac790f2-c7e6-4b49-85c1-447b753e9270</UserSecretsId>
+      <RootNamespace>AgentFrameworkChat</RootNamespace>
   </PropertyGroup>
 
     <ItemGroup>

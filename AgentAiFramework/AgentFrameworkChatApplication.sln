@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgentFrameworkChat", "AgentFrameworkChat\AgentFrameworkChat.csproj", "{10E8F4C3-A53C-4A73-92A9-28CB3272637A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{10E8F4C3-A53C-4A73-92A9-28CB3272637A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{022F7500-D692-4409-A27B-8DB13BDCA5B7}"
 EndProject

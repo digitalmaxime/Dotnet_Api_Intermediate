@@ -20,5 +20,5 @@ public interface IConversationRepository
     
     Task ArchiveUserConversation(Guid conversationId, CancellationToken cancellationToken = default);
     
-    Task PurgeConversationsOlderThan(Guid conversationId, int numberOfDays, CancellationToken cancellationToken = default);
+    Task<int> PurgeConversationsOlderThan(Guid conversationId, int numberOfDays, CancellationToken cancellationToken = default);
 }

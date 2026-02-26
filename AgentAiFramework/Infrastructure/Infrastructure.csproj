@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AgentFrameworkChat\AgentFrameworkChat.csproj" />
+      <ProjectReference Include="..\Api\Api.csproj" />
     </ItemGroup>
 
 </Project>
