@@ -1,4 +1,4 @@
-using AgentFrameworkChat.Contracts.Repositories;
+using Application.Contracts.Repositories;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OpenApi;
@@ -9,16 +10,28 @@ namespace AgentFrameworkChat.Extensions.OpenApi;
 
 public static class OpenApiExtension
 {
-    public static void ConfigureOpenApi(this IServiceCollection services)
+    public static IServiceCollection ConfigureOpenApiDocumentation(this IServiceCollection services)
     {
-        services.AddOpenApi(options => { options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); });
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+        });
+        
+        services.AddOpenApi("v1", options => { options.AddDocumentTransformer<BearerSecuritySchemeTransformer>(); });
+
+        return services;
     }
 
-    public static void UseOpenApiDocumentation(this WebApplication app)
+    public static WebApplication UseOpenApiDocumentation(this WebApplication app)
     {
         app.MapOpenApi();
         app.MapScalarApiReference(options =>
         {
+            options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
+            options.AddDocument("v1", "Api Documentation version 1.0.0");
+            options.AddPreferredSecuritySchemes(JwtBearerDefaults.AuthenticationScheme);
             options.Authentication = new ScalarAuthenticationOptions
             {
                 PreferredSecurityScheme = JwtBearerDefaults.AuthenticationScheme,
@@ -27,14 +40,18 @@ public static class OpenApiExtension
                 // Live token input is handled by the transformer below
             };
         });
+        
         // app.MapScalarApiReference(options => options
         //     .AddPreferredSecuritySchemes("BearerAuth")
         //     .AddHttpAuthentication("BearerAuth", auth =>
         //     {
         //         auth.Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
         //     }));
+
+        return app;
     }
 
+    #region OpenApi Transformer
     internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
     {
         public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
@@ -66,5 +83,5 @@ public static class OpenApiExtension
             return Task.CompletedTask;
         }
     } 
-
+#endregion
 }

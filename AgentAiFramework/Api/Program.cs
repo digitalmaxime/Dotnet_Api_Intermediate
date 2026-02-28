@@ -1,37 +1,45 @@
-using AgentFrameworkChat.AI.Agents;
-using AgentFrameworkChat.AI.History;
 using AgentFrameworkChat.Endpoints;
+using AgentFrameworkChat.Endpoints.Conversations;
+using AgentFrameworkChat.Extensions.EndpointsExtension;
 using AgentFrameworkChat.Extensions.OpenApi;
-using AgentFrameworkChat.Features;
-using AgentFrameworkChat.Options;
+using Application.Extensions_Application;
+using FluentValidation;
+using Infrastructure.Extensions;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddAuthorization();
-builder.Services.ConfigureOpenApi();
+builder.Services
+    .AddHttpContextAccessor()
+    .AddAuthorization()
+    .ConfigureOpenApiDocumentation()
+    .AddValidatorsFromAssembly(typeof(Program).Assembly)
+// services.AddTransient<ExceptionMiddleware>() // TODO:
+    // services.ConfigureSecurity() // TODO:
+    .AddSingleton(TimeProvider.System)
+    .AddApplicationServices(builder.Configuration)
+    .AddInfrastructure(builder.Configuration);
 
 /* Dev UI OpenAi dependencies */
 builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
 
-var app = builder.Build();
+var application = builder.Build();
 
-app.UseOpenApiDocumentation();
+application
+    .UseOpenApiDocumentation()
+    .MapApiEndpoints()
+    .UseHttpsRedirection();
 
-app.UseHttpsRedirection();
-
-app.MapConversationEndpoints();
 
 /* Dev UI OpenAi dependencies */
-if (app.Environment.IsDevelopment())
+if (application.Environment.IsDevelopment())
 {
-    app.MapOpenAIResponses();
-    app.MapOpenAIConversations();
-    app.MapDevUI();
+    application.MapOpenAIResponses();
+    application.MapOpenAIConversations();
+    application.MapDevUI();
 }
 
-app.Run();
+application.Run();

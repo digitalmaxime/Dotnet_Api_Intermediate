@@ -1,4 +1,4 @@
-using AgentFrameworkChat.Enums;
+using Application.Enums;
 
 namespace Infrastructure.Entities;
 

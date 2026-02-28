@@ -1,4 +1,4 @@
-using AgentFrameworkChat.Enums;
+using Application.Enums;
 using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

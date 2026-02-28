@@ -1,8 +1,8 @@
 using System.Text.Json;
-using AgentFrameworkChat.Contracts.Repositories;
-using AgentFrameworkChat.Enums;
-using AgentFrameworkChat.Extensions;
-using AgentFrameworkChat.Models;
+using Application.Contracts.Repositories;
+using Application.Enums;
+using Application.Extensions_Application;
+using Application.Models;
 using Infrastructure.Entities;
 using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;

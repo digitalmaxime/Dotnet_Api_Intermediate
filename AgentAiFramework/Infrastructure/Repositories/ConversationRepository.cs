@@ -1,6 +1,6 @@
 using System.Text.Json;
-using AgentFrameworkChat.Contracts.Repositories;
-using AgentFrameworkChat.Models;
+using Application.Contracts.Repositories;
+using Application.Models;
 using Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
