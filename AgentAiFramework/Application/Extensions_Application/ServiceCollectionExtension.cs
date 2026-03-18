@@ -30,7 +30,7 @@ public static class ServiceCollectionExtension
 
         var openAiOptions = configuration.GetRequiredSection(AzureOpenAiOptions.SectionName).Get<AzureOpenAiOptions>();
         services.AddAIAgent(AgentFactory.AgentName,
-            (sp, _) => AgentFactory.CreateAgent(sp, openAiOptions, configuration.GetConnectionString("DefaultConnection")));
+            (sp, _) => AgentFactory.CreateAgent(sp, openAiOptions));
 
         return services;
     }

@@ -1,4 +1,5 @@
-﻿using Application.Features.Chat;
+﻿using Application.Enums;
+using Application.Features.Chat;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -20,7 +21,7 @@ public static class ConversationEndpoints
 
         group.MapPost("", async Task<Results<Ok<ChatCommandResponseDto>, BadRequest<List<ValidationFailure>>>>
         (HttpContext httpContext, IMediator mediator, /*, IValidator<ChatRequestDto> validator, */
-            [FromBody] ChatRequestDto requestDto) =>
+            [FromBody] ChatRequestDto requestDto, [FromQuery] Language language) =>
         {
             // var validationResult = await validator.ValidateAsync(requestDto);
             // if (!validationResult.IsValid)
@@ -32,11 +33,11 @@ public static class ConversationEndpoints
 
             var chatCommandDto = new ChatCommandDto()
             {
-                Username = username0,
+                Username = "maxou",
                 ConversationId = requestDto.ConversationId,
                 Message = requestDto.Message,
                 CorrelationId = requestDto.CorrelationId,
-                Language = requestDto.Language
+                Language = language
             };
 
             var aiChatResponse = await mediator.Send(chatCommandDto);

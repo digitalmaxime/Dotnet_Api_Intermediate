@@ -1,4 +1,4 @@
-﻿using Application.AI.History;
+﻿﻿using Application.AI.History;
 using Application.AI.Tools;
 using Application.Options;
 using Azure;
@@ -11,12 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Application.AI.Agents;
 
 #pragma warning disable MEAI001
-public class AgentFactory
+public static class AgentFactory
 {
     public const string AgentName = "MainAgent";
 
-    public static AIAgent CreateAgent(IServiceProvider serviceProvider, AzureOpenAiOptions azureOpenAiOptions,
-        string connectionString)
+    public static AIAgent CreateAgent(IServiceProvider serviceProvider, AzureOpenAiOptions azureOpenAiOptions)
     {
         var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
 
@@ -48,8 +47,7 @@ public class AgentFactory
                                      ?? throw new InvalidOperationException("No request services found");
 
                 ChatHistoryProvider historyProvider =
-                    ActivatorUtilities.CreateInstance<MyChatMessageStore>(requestService, ctx.SerializedState,
-                        connectionString);
+                    ActivatorUtilities.CreateInstance<MyChatMessageStore>(requestService, ctx.SerializedState);
 
                 return ValueTask.FromResult(historyProvider);
             }

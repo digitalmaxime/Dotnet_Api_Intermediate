@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Application.Contracts.Repositories;
 using Microsoft.Agents.AI;
@@ -9,7 +9,6 @@ namespace Application.AI.History;
 [Experimental("MEAI001")]
 public class MyChatMessageStore(
     JsonElement serializedStoreState,
-    string connectionString,
     IMessageRepository messageRepository)
     : ChatHistoryProvider
 {

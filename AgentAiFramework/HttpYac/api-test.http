@@ -1,0 +1,112 @@
+
+### Get token
+# @name GetMaxouToken
+POST {{AuthAddress}}
+Content-Type: application/x-www-form-urlencoded
+
+type = internalsystems &
+scope = openid profile chat_client &
+audience = chat &
+username = maxou &
+password = password
+
+> {%
+    client.global.set("access_token", response.body.access_token)
+%}
+
+
+### Set question variable
+GET http://httpbin.org/status/200
+
+> {%
+    const colors = ["red", "blue", "orange", "azure"];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    client.global.set("question", `Why is the sky  ${randomColor}`);
+    client.global.set("color", `${randomColor}`);
+%}
+
+### Why is the sky blue?
+POST {{HostAddress}}/api/v1/conversations?language=En
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "Message": "{{question}}",
+  "ConversationId": null,
+  "CorrelationId": "123-456-789",
+  "Username": "maxou"
+}
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status);
+    })
+%}
+
+### Get conversations
+GET {{HostAddress}}/api/v1/conversations
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+    });
+
+    const conversations = (reponse.body && Array.isArray(response.body.conversations)) ? response.body.conversations : [];
+    client.assert(conversations.length > 0, "Response body.conversations is missing or empty");
+    const last = conversations[conversations.length - 1];
+    const lastConversationId = (last && typeof last === "object") ? (last.conversationId ?? last.id ?? "") : String(last ?? "");
+
+    client.assert(lastConversationId.length > 0, "Last conversation id is missing or empty");
+    console.log("lastConversationId", lastConversationId);
+    client.global.set("conversationId", lastConversationId);
+%}
+
+### What did i just asked?
+POST {{HostAddress}}/api/v1/conversations?language=en
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "Message": "What did I just asked?",
+  "ConversationId": "{{conversationId}}",
+  "CorrelationId": "123-456-789"
+}
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+    });
+
+    client.test("Payload content contains first questions", function () {
+        const content = (response.body && response.body.content) ? String(response.body.content).trim().toLowerCase() : "";
+        client.assert(content.length > 0, "Response body.content is missing or empty");
+    })
+
+    const color = client.global.get("color").toString().trim().toLowerCase();
+    console.log("Original color tin find: ", color);
+    client.assert(content.includes(color), `Expected content to include the color ${color}, but it did not. Content was : ${content}`);
+%}
+
+### Final question
+POST {{HostAddress}}/api/v1/conversations?language=en
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{ 
+  "Messages": "I love pizza",
+  "ConversationId": "{{conversationId}}",
+  "CorrelationId": "123-456-789"
+}
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+    });
+%}
+

@@ -23,7 +23,7 @@ public class MessageRepository(ChatDbContext context, TimeProvider timeProvider)
             MessageText = x.Text,
             Role = x.Role.ToRoleEnum(),
             Type = x.GetChatMessageType()
-        }));
+        }), cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
     }
