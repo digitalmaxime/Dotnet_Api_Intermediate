@@ -1,5 +1,8 @@
-﻿using Application.Enums;
+﻿using AgentFrameworkChat.Endpoints.Conversations.Filters;
+using Application.Enums;
 using Application.Features.Chat;
+using Application.Features.GetUserConversations;
+using Application.Models;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -14,7 +17,9 @@ public static class ConversationEndpoints
     public static IEndpointRouteBuilder MapConversationEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("conversations")
-            .WithTags("Conversations");
+            .WithTags("Conversations")
+            .RequireAuthorization()
+            .AddEndpointFilter<ConversationEndpointFilter>();
         // TODO: require auth
         // TODO: add endpoint filter
         // TODO: validator
@@ -54,11 +59,25 @@ public static class ConversationEndpoints
             // read the token from the header
             var accessToken = header[0]?.Replace("Bearer ", "");
             var handler = new JsonWebTokenHandler();
-            if (!handler.CanReadToken(accessToken)) return TypedResults.BadRequest(new List<ValidationFailure>()
-                { new() { ErrorMessage = "invalid token" } });
-            
+            if (!handler.CanReadToken(accessToken))
+                return TypedResults.BadRequest(new List<ValidationFailure>()
+                    { new() { ErrorMessage = "invalid token" } });
+
             var token = handler.ReadJsonWebToken(accessToken);
             var username = token.Claims.First(c => c.Type == "name").Value;
+        });
+
+        group.MapGet("", async Task<Results<Ok<GetUserConversationsResponseDto>, ValidationProblem>> (HttpContext context,
+            IMediator mediator) =>
+        {
+            var dto = new GetUserConversationsRequestDto
+            {
+                Username = context.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value!
+            };
+
+            var response = await mediator.Send(dto);
+
+            return TypedResults.Ok(response);
         });
 
         return endpoints;

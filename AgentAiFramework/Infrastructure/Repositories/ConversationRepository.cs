@@ -12,7 +12,7 @@ public class ConversationRepository(ChatDbContext context, TimeProvider timeProv
         CancellationToken cancellationToken = default)
     {
         username = username.ToLowerInvariant();
-        var filteredConverations = await context.Conversations
+        var filteredConversations = await context.Conversations
             .AsNoTracking()
             .Where(c => c.Username == username && !c.IsArchived)
             .OrderBy(c => c.CreationDate)
@@ -26,7 +26,7 @@ public class ConversationRepository(ChatDbContext context, TimeProvider timeProv
                 ModificationDate = c.ModificationDate,
             }).ToListAsync(cancellationToken);
 
-        return filteredConverations;
+        return filteredConversations;
     }
 
     public async Task<ConversationModel?> GetConversation(Guid conversationId,

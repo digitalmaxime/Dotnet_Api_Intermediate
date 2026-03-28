@@ -13,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddHttpContextAccessor()
+    .AddAuthentication()
+    .AddJwtBearer();
+builder.Services
     .AddAuthorization()
     .ConfigureOpenApiDocumentation()
     .AddValidatorsFromAssembly(typeof(Program).Assembly)
