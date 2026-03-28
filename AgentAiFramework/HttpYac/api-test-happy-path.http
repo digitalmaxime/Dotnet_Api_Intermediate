@@ -35,13 +35,12 @@ Content-Type: application/json
 {
   "Message": "{{question}}",
   "ConversationId": null,
-  "CorrelationId": "123-456-789",
-  "Username": "maxou"
+  "CorrelationId": "123-456-789"
 }
 
 > {%
     client.test("Status code is 2xx", function () {
-        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status);
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status);
     })
 %}
 
@@ -54,15 +53,15 @@ Content-Type: application/json
 
 > {%
     client.test("Status code is 2xx", function () {
-        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status)
     });
 
     const conversations = (response.body && Array.isArray(response.body.conversations)) ? response.body.conversations : [];
-    client.assert(conversations.length > 0, "Response body.conversations is missing or empty");
+    client.assert(conversations.length > 0, "❌ Response body.conversations is missing or empty");
     const last = conversations[conversations.length - 1];
     const lastConversationId = (last && typeof last === "object") ? (last.conversationId ?? last.id ?? "") : String(last ?? "");
 
-    client.assert(lastConversationId.length > 0, "Last conversation id is missing or empty");
+    client.assert(lastConversationId.length > 0, "❌ Last conversation id is missing or empty");
     console.log("lastConversationId", lastConversationId);
     client.global.set("conversationId", lastConversationId);
 %}
@@ -82,16 +81,16 @@ Content-Type: application/json
 
 > {%
     client.test("Status code is 2xx", function () {
-        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status)
     });
 
     client.test("Payload content contains first questions", function () {
         const content = (response.body && response.body.content) ? String(response.body.content).trim().toLowerCase() : "";
-        client.assert(content.length > 0, "Response body.content is missing or empty");
+        client.assert(content.length > 0, "❌ Response body.content is missing or empty");
 
         const color = client.global.get("color").toString().trim().toLowerCase();
         console.log("Original color to find: ", color);
-        client.assert(content.includes(color), `Expected content to include the color ${color}, but it did not. Content was : ${content}`);
+        client.assert(content.includes(color), `❌ Expected content to include the color ${color}, but it did not. Content was : ${content}`);
     });
 %}
 
@@ -109,7 +108,7 @@ Content-Type: application/json
 
 > {%
     client.test("Status code is 2xx", function () {
-        client.assert(response.status >= 200 && response.status < 300, "Expected 2xx status code, but got: " + response.status)
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status)
     });
 %}
 

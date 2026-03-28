@@ -1,0 +1,78 @@
+
+### Get token
+# @name GetMaxouToken
+POST {{AuthAddress}}
+Content-Type: application/x-www-form-urlencoded
+
+type = internalsystems &
+scope = openid profile chat_client &
+audience = chat &
+username = maxou &
+password = password
+
+> {%
+    // client.global.set("access_token2", response.body.access_token)
+    client.global.set("access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6Im1heGltZXRyZW1ibGF5LXJoZWF1bHQiLCJzdWIiOiJtYXhpbWV0cmVtYmxheS1yaGVhdWx0IiwianRpIjoiOWE1Yzg4MGYiLCJuYW1lIjoibWF4b3UiLCJhdWQiOlsiaHR0cHM6Ly9sb2NhbGhvc3Q6NzA1OCIsIiJdLCJuYmYiOjE3NzQ3MDQwNzUsImV4cCI6MTc4MjY1Mjg3NSwiaWF0IjoxNzc0NzA0MDc1LCJpc3MiOiJkb3RuZXQtdXNlci1qd3RzIn0.eh_WY8kGjV2JGm2EWPMT9RPkPpcAOnfvZB90Z1xRYBU")
+%}
+
+
+### Order me a pizza
+POST {{HostAddress}}/api/v1/conversations?language=En
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "Message": "Order me a pizza",
+  "ConversationId": null,
+  "CorrelationId": "123-456-789"
+}
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status);
+    });
+    
+    client.test("Pizza tool call invoked", function() {
+        const content = (response.body && response.body.content) ? String(response.body.content).trim().toLowerCase() : "";
+        client.assert(content.length > 0, "Response body.content is missing or empty");
+        
+    })
+    
+    console.log("Pizza tool call assertion completed");
+%}
+
+
+### Get conversations
+GET {{HostAddress}}/api/v1/conversations
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status)
+    });
+
+    const conversations = (response.body && Array.isArray(response.body.conversations)) ? response.body.conversations : [];
+    client.assert(conversations.length > 0, "❌ Response body.conversations is missing or empty");
+    const last = conversations[conversations.length - 1];
+    const lastConversationId = (last && typeof last === "object") ? (last.conversationId ?? last.id ?? "") : String(last ?? "");
+
+    client.assert(lastConversationId.length > 0, "❌ Last conversation id is missing or empty");
+    console.log("lastConversationId", lastConversationId);
+    client.global.set("conversationId", lastConversationId);
+%}
+
+### Approve pizza order
+POST {{HostAddress}}/api/v1/conversations/{{conversationId}}/approve?language=En
+Accept: application/json
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+> {%
+    client.test("Status code is 2xx", function () {
+        client.assert(response.status >= 200 && response.status < 300, "❌ Expected 2xx status code, but got: " + response.status);
+    });
+%}

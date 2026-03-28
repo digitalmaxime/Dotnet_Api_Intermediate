@@ -16,7 +16,7 @@ public class PizzaDeliveryTool : IApprovalRequiredAiTool
 
     
     [Description("Order a pizza")]
-    private static async Task<string> OrderPizza(IServiceProvider serviceProvider)
+    public static async Task<string> OrderPizza(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
         var testService = scope.ServiceProvider.GetRequiredService<IPizzaService>();

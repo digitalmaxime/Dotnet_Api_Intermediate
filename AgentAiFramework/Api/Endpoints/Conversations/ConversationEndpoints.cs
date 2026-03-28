@@ -1,5 +1,6 @@
 ﻿using AgentFrameworkChat.Endpoints.Conversations.Filters;
 using Application.Enums;
+using Application.Features.ApprovePizzaOrder;
 using Application.Features.Chat;
 using Application.Features.GetUserConversations;
 using Application.Models;
@@ -28,17 +29,9 @@ public static class ConversationEndpoints
         (HttpContext httpContext, IMediator mediator, /*, IValidator<ChatRequestDto> validator, */
             [FromBody] ChatRequestDto requestDto, [FromQuery] Language language) =>
         {
-            // var validationResult = await validator.ValidateAsync(requestDto);
-            // if (!validationResult.IsValid)
-            // {
-            //     return TypedResults.BadRequest(validationResult.Errors);
-            // }
-
-            var username0 = httpContext.User.Identity?.Name;
-
             var chatCommandDto = new ChatCommandDto()
             {
-                Username = "maxou",
+                Username = httpContext.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value!,
                 ConversationId = requestDto.ConversationId,
                 Message = requestDto.Message,
                 CorrelationId = requestDto.CorrelationId,
@@ -48,26 +41,10 @@ public static class ConversationEndpoints
             var aiChatResponse = await mediator.Send(chatCommandDto);
 
             return TypedResults.Ok(aiChatResponse);
-
-            var header = httpContext.Request.Headers["Authorization"];
-            if (header.Count == 0)
-            {
-                return TypedResults.BadRequest(new List<ValidationFailure>()
-                    { new() { ErrorMessage = "No Authorization header foun" } });
-            }
-
-            // read the token from the header
-            var accessToken = header[0]?.Replace("Bearer ", "");
-            var handler = new JsonWebTokenHandler();
-            if (!handler.CanReadToken(accessToken))
-                return TypedResults.BadRequest(new List<ValidationFailure>()
-                    { new() { ErrorMessage = "invalid token" } });
-
-            var token = handler.ReadJsonWebToken(accessToken);
-            var username = token.Claims.First(c => c.Type == "name").Value;
         });
 
-        group.MapGet("", async Task<Results<Ok<GetUserConversationsResponseDto>, ValidationProblem>> (HttpContext context,
+        group.MapGet("", async Task<Results<Ok<GetUserConversationsResponseDto>, ValidationProblem>> (
+            HttpContext context,
             IMediator mediator) =>
         {
             var dto = new GetUserConversationsRequestDto
@@ -79,6 +56,23 @@ public static class ConversationEndpoints
 
             return TypedResults.Ok(response);
         });
+
+        group.MapPost("{conversationId}/approve",
+            async Task<Results<Ok<ApprovePizzaOrderResponseDto>, ValidationProblem>> ([FromRoute] Guid conversationId,
+                HttpContext context, IMediator mediator) =>
+            {
+                var username = context.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value!;
+
+                var response = await mediator.Send(new ApprovePizzaOrderRequestDto()
+                {
+                    Username = username,
+                    ConversationId = conversationId,
+                    IsApproved = true,
+                    Language = Language.En
+                });
+
+                return TypedResults.Ok(response);
+            });
 
         return endpoints;
     }

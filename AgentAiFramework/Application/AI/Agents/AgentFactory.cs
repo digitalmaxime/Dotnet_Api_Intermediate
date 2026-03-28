@@ -7,6 +7,7 @@ using Microsoft.Agents.AI;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Application.AI.Agents;
 
@@ -18,7 +19,8 @@ public static class AgentFactory
     public static AIAgent CreateAgent(IServiceProvider serviceProvider, AzureOpenAiOptions azureOpenAiOptions)
     {
         var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
-
+        var aiOptions = serviceProvider.GetRequiredService<IOptionsMonitor<AgentConfigurationOptions>>().Get(AgentName);
+        
         var chatClient = new AzureOpenAIClient(
                 new Uri(azureOpenAiOptions.Endpoint),
                 new AzureKeyCredential(azureOpenAiOptions.ApiKey)
@@ -31,13 +33,11 @@ public static class AgentFactory
             Description = "A chat agent that uses AI tools to assist users.",
             ChatOptions = new ChatOptions()
             {
-                Instructions = $@"You are a utility assistant helping user username . 
-                    When greeting or addressing the user, use their name: username .
-                    You can get the current date/time when needed using your available tools.
-                    Always provide personalized and helpful responses.",
+                Instructions = string.Join(" ", aiOptions.LlmInstructions),
                 Tools =
                 [
                     AIFunctionFactory.Create(DateTimeTool.GetDateTime),
+                    // AIFunctionFactory.Create(PizzaDeliveryTool.OrderPizza)
                     PizzaDeliveryTool.ApprovalRequiredReservationTool
                 ]
             },
@@ -53,7 +53,7 @@ public static class AgentFactory
             }
         };
 
-        var agent = new ChatClientAgent(chatClient, chatClientOptions)
+        var agent = new ChatClientAgent(chatClient, chatClientOptions, services: serviceProvider)
             .AsBuilder()
             // .Use() // TODO: middleware
             .Build();
